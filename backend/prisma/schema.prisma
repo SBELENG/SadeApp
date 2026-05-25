@@ -1,0 +1,136 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 1. Institucion
+model Institucion {
+  id                String     @id @default(uuid()) @db.Uuid
+  nombre            String     @db.VarChar(255)
+  logo_url          String?    @db.Text
+  nivel_complejidad Int        // 2 o 3
+  created_at        DateTime   @default(now()) @db.Timestamptz
+  servicios         Servicio[]
+
+  @@map("instituciones")
+}
+
+// 2. Servicio
+model Servicio {
+  id              String      @id @default(uuid()) @db.Uuid
+  institucion_id  String      @db.Uuid
+  nombre          String      @db.VarChar(255)
+  especialidad_key String     @db.VarChar(100)
+  camas           Int
+  institucion     Institucion @relation(fields: [institucion_id], references: [id], onDelete: Cascade)
+  personal        Personal[]
+  planillas       Planilla[]
+
+  @@map("servicios")
+}
+
+enum NivelFormacion {
+  LICENCIADO
+  ENFERMERO_PROFESIONAL
+  ENFERMERO_ESPECIALISTA
+  AUXILIAR
+}
+
+enum PersonalEstado {
+  ACTIVO
+  VACACIONES
+  LICENCIA_ENFERMEDAD
+  CAPACITACION
+}
+
+// 3. Personal
+model Personal {
+  id                     String         @id @default(uuid()) @db.Uuid
+  servicio_id            String         @db.Uuid
+  nombre                 String         @db.VarChar(100)
+  apellido               String         @db.VarChar(100)
+  dni                    String         @unique @db.VarChar(20)
+  matricula              String         @unique @db.VarChar(50)
+  nivel_formacion        NivelFormacion
+  jornada_horas          Int            // 6 o 8
+  turno_fijo             TurnoTipo?     // M, T, N, F, null
+  antiguedad_anos        Int
+  estado                 PersonalEstado @default(ACTIVO)
+  compensatorio_pendiente Int            @default(0)
+  created_at             DateTime       @default(now()) @db.Timestamptz
+  servicio               Servicio       @relation(fields: [servicio_id], references: [id], onDelete: Cascade)
+  turnos                 Turno[]
+
+  @@map("personal")
+}
+
+enum PlanillaEstado {
+  BORRADOR
+  CERRADA
+}
+
+// 4. Planilla (Grid Header)
+model Planilla {
+  id                String             @id @default(uuid()) @db.Uuid
+  servicio_id       String             @db.Uuid
+  anio              Int
+  mes               Int                // 1-12
+  dias_mes          Int                // 28-31
+  feriados          Int[]              // Días marcados como feriado
+  estado            PlanillaEstado     @default(BORRADOR)
+  servicio          Servicio           @relation(fields: [servicio_id], references: [id], onDelete: Cascade)
+  turnos            Turno[]
+  dotacion_calculada DotacionCalculada?
+
+  @@map("planillas")
+}
+
+enum TurnoTipo {
+  M
+  T
+  N
+  F
+}
+
+enum AlertaNivel {
+  YELLOW
+  ORANGE
+  RED
+}
+
+// 5. Turno (Celda)
+model Turno {
+  id              String       @id @default(uuid()) @db.Uuid
+  planilla_id     String       @db.Uuid
+  personal_id     String       @db.Uuid
+  dia             Int          // 1-31
+  tipo            TurnoTipo
+  es_compensatorio Boolean      @default(false)
+  alerta_nivel    AlertaNivel?
+  updated_at      DateTime     @default(now()) @updatedAt @db.Timestamptz
+  planilla        Planilla     @relation(fields: [planilla_id], references: [id], onDelete: Cascade)
+  personal        Personal     @relation(fields: [personal_id], references: [id], onDelete: Cascade)
+
+  @@unique([planilla_id, personal_id, dia])
+  @@map("turnos")
+}
+
+// 6. Dotacion Calculada
+model DotacionCalculada {
+  id          String   @id @default(uuid()) @db.Uuid
+  planilla_id String   @unique @db.Uuid
+  P           Decimal  @db.Decimal(5, 2)
+  B           Decimal  @db.Decimal(5, 2)
+  Z           Decimal  @db.Decimal(5, 2)
+  Q_manana    Decimal  @db.Decimal(5, 2)
+  Q_tarde     Decimal  @db.Decimal(5, 2)
+  Q_noche     Decimal  @db.Decimal(5, 2)
+  Q_franco    Decimal  @db.Decimal(5, 2)
+  planilla    Planilla @relation(fields: [planilla_id], references: [id], onDelete: Cascade)
+
+  @@map("dotaciones_calculadas")
+}

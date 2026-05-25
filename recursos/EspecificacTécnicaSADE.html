@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Especificación Técnica — SADE</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: rgba(99,179,237,0.12);
+    --border2: rgba(99,179,237,0.22);
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --accent3: #34d399;
+    --accent4: #fb923c;
+    --accent5: #f87171;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --heading: #f1f5f9;
+    --tag-bg: rgba(56,189,248,0.08);
+    --tag-border: rgba(56,189,248,0.25);
+    --mono: 'DM Mono', monospace;
+    --sans: 'Inter', sans-serif;
+    --display: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.75;
+    font-weight: 300;
+  }
+
+  /* ── LAYOUT ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 240px;
+    height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 32px 0;
+    z-index: 100;
+  }
+
+  .sidebar-logo {
+    padding: 0 24px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+
+  .sidebar-logo .app-name {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sidebar-logo .app-name::before {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent3);
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo .version {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 4px;
+  }
+
+  .nav-section {
+    padding: 0 12px;
+    margin-bottom: 8px;
+  }
+
+  .nav-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 8px 12px 4px;
+  }
+
+  .nav-item {
+    display: block;
+    padding: 7px 12px;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 13px;
+    border-radius: 6px;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-item:hover {
+    color: var(--accent);
+    background: var(--tag-bg);
+    border-left-color: var(--accent);
+  }
+
+  .nav-item.active {
+    color: var(--accent);
+    background: var(--tag-bg);
+    border-left-color: var(--accent);
+  }
+
+  main {
+    margin-left: 240px;
+    max-width: 900px;
+    padding: 60px 64px;
+  }
+
+  /* ── COVER ── */
+  .cover {
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 60px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover::before {
+    content: 'NS';
+    position: absolute;
+    top: -20px; right: -20px;
+    font-family: var(--display);
+    font-size: 240px;
+    font-weight: 800;
+    color: rgba(56,189,248,0.03);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .cover-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .cover h1 {
+    font-family: var(--display);
+    font-size: 52px;
+    font-weight: 800;
+    color: var(--heading);
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 20px;
+  }
+
+  .cover h1 span { color: var(--accent); }
+
+  .cover p {
+    color: var(--text2);
+    font-size: 16px;
+    max-width: 560px;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .meta-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .meta-value {
+    font-size: 13px;
+    color: var(--text2);
+    font-weight: 400;
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    margin-bottom: 80px;
+    scroll-margin-top: 40px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    border-radius: 4px;
+    padding: 3px 8px;
+    flex-shrink: 0;
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--heading);
+    letter-spacing: -0.8px;
+  }
+
+  h3 {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--heading);
+    letter-spacing: -0.3px;
+    margin: 28px 0 12px;
+  }
+
+  h4 {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 20px 0 8px;
+  }
+
+  p { margin-bottom: 14px; color: var(--text2); }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .card-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .card.accent-blue { border-left: 3px solid var(--accent); }
+  .card.accent-green { border-left: 3px solid var(--accent3); }
+  .card.accent-purple { border-left: 3px solid var(--accent2); }
+  .card.accent-orange { border-left: 3px solid var(--accent4); }
+  .card.accent-red { border-left: 3px solid var(--accent5); }
+
+  .card-title {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--heading);
+    margin-bottom: 8px;
+  }
+
+  .card p { font-size: 13.5px; margin-bottom: 0; }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 16px 0 24px;
+    overflow-x: auto;
+    position: relative;
+  }
+
+  .code-block::before {
+    content: attr(data-lang);
+    position: absolute;
+    top: 10px; right: 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .code-block pre {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: #a5f3fc;
+    line-height: 1.8;
+    white-space: pre;
+  }
+
+  .code-block .kw { color: #c084fc; }
+  .code-block .fn { color: #67e8f9; }
+  .code-block .str { color: #86efac; }
+  .code-block .cm { color: var(--text3); }
+  .code-block .num { color: #fbbf24; }
+  .code-block .var { color: #f9a8d4; }
+
+  /* ── FORMULA BLOCK ── */
+  .formula {
+    background: rgba(56,189,248,0.05);
+    border: 1px solid var(--tag-border);
+    border-radius: 8px;
+    padding: 20px 28px;
+    margin: 16px 0;
+    font-family: var(--mono);
+    font-size: 16px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    text-align: center;
+  }
+
+  .formula .label {
+    font-size: 11px;
+    color: var(--text3);
+    display: block;
+    text-align: center;
+    margin-top: 4px;
+    font-family: var(--sans);
+  }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 16px 0 24px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+
+  th {
+    background: var(--surface2);
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.015); }
+
+  /* ── TAGS ── */
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 4px;
+    border: 1px solid;
+    margin: 2px;
+    font-weight: 500;
+  }
+
+  .tag-blue { color: var(--accent); border-color: var(--tag-border); background: var(--tag-bg); }
+  .tag-green { color: var(--accent3); border-color: rgba(52,211,153,0.25); background: rgba(52,211,153,0.06); }
+  .tag-purple { color: var(--accent2); border-color: rgba(129,140,248,0.25); background: rgba(129,140,248,0.06); }
+  .tag-orange { color: var(--accent4); border-color: rgba(251,146,60,0.25); background: rgba(251,146,60,0.06); }
+  .tag-red { color: var(--accent5); border-color: rgba(248,113,113,0.25); background: rgba(248,113,113,0.06); }
+
+  /* ── ALERT ── */
+  .alert {
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 13.5px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .alert-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .alert-red { background: rgba(248,113,113,0.07); border: 1px solid rgba(248,113,113,0.2); color: #fca5a5; }
+  .alert-orange { background: rgba(251,146,60,0.07); border: 1px solid rgba(251,146,60,0.2); color: #fdba74; }
+  .alert-yellow { background: rgba(250,204,21,0.07); border: 1px solid rgba(250,204,21,0.2); color: #fde68a; }
+  .alert-green { background: rgba(52,211,153,0.07); border: 1px solid rgba(52,211,153,0.2); color: #6ee7b7; }
+  .alert-blue { background: rgba(56,189,248,0.07); border: 1px solid rgba(56,189,248,0.2); color: #7dd3fc; }
+
+  /* ── REQ ITEMS ── */
+  .req-list { list-style: none; }
+
+  .req-item {
+    display: flex;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+
+  .req-item:last-child { border-bottom: none; }
+
+  .req-id {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent5);
+    background: rgba(248,113,113,0.08);
+    border: 1px solid rgba(248,113,113,0.2);
+    border-radius: 4px;
+    padding: 2px 8px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .req-id.blue { color: var(--accent); background: var(--tag-bg); border-color: var(--tag-border); }
+  .req-id.green { color: var(--accent3); background: rgba(52,211,153,0.06); border-color: rgba(52,211,153,0.25); }
+
+  .req-text { color: var(--text2); font-size: 13.5px; line-height: 1.6; }
+  .req-text strong { color: var(--text); font-weight: 500; }
+
+  /* ── STEP ── */
+  .step-list { list-style: none; counter-reset: steps; }
+
+  .step-item {
+    counter-increment: steps;
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .step-content h4 { margin: 4px 0 6px; }
+  .step-content p { font-size: 13.5px; margin-bottom: 0; }
+
+  /* ── SCREEN MOCKUP ── */
+  .screen-box {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+
+  .screen-box .screen-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .screen-box .screen-label::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  /* ── COLOR CHIPS ── */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin: 16px 0 24px;
+  }
+
+  .color-chip {
+    border-radius: 8px;
+    padding: 16px 12px 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .color-chip .chip-name {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(0,0,0,0.6);
+    margin-top: 6px;
+    display: block;
+  }
+
+  .chip-dark .chip-name { color: rgba(255,255,255,0.55); }
+
+  /* ── TYPOGRAPHY DEMO ── */
+  .type-demo {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    margin: 16px 0 24px;
+  }
+
+  /* ── DIVIDER ── */
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* ── STACK DIAGRAM ── */
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 16px 0 24px;
+  }
+
+  .stack-layer {
+    border-radius: 8px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid;
+  }
+
+  .stack-layer-label {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .stack-layer-tech {
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  /* ── FLOW ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 16px 0 24px;
+    flex-wrap: wrap;
+  }
+
+  .flow-step {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13px;
+    color: var(--text2);
+    white-space: nowrap;
+  }
+
+  .flow-arrow {
+    color: var(--text3);
+    font-size: 16px;
+    padding: 0 8px;
+  }
+
+  /* ── ENTITY CARD ── */
+  .entity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0 24px;
+  }
+
+  .entity-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .entity-header {
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .entity-fields {
+    padding: 12px 16px;
+    list-style: none;
+  }
+
+  .entity-fields li {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text2);
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .entity-fields li:last-child { border-bottom: none; }
+  .entity-fields .field-type { color: var(--text3); }
+
+  /* ── SCREEN WIREFRAME ── */
+  .wireframe {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .wf-topbar {
+    background: rgba(56,189,248,0.06);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  .wf-body { padding: 20px; }
+
+  .wf-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    align-items: stretch;
+  }
+
+  .wf-block {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  .wf-block.highlight {
+    border-color: var(--accent);
+    background: rgba(56,189,248,0.05);
+    color: var(--accent);
+  }
+
+  .wf-block.red-alert {
+    border-color: rgba(248,113,113,0.4);
+    background: rgba(248,113,113,0.08);
+    color: #fca5a5;
+  }
+
+  .wf-block.orange-alert {
+    border-color: rgba(251,146,60,0.4);
+    background: rgba(251,146,60,0.08);
+    color: #fdba74;
+  }
+
+  .wf-block.green-ok {
+    border-color: rgba(52,211,153,0.4);
+    background: rgba(52,211,153,0.08);
+    color: #6ee7b7;
+  }
+
+  /* ── PHASE TIMELINE ── */
+  .timeline { margin: 16px 0 24px; }
+
+  .tl-item {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 0;
+  }
+
+  .tl-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .tl-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    background: var(--bg);
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .tl-dot.done { background: var(--accent3); border-color: var(--accent3); }
+
+  .tl-line {
+    width: 1px;
+    background: var(--border2);
+    flex: 1;
+    min-height: 28px;
+  }
+
+  .tl-right {
+    padding-bottom: 28px;
+  }
+
+  .tl-phase {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+
+  .tl-title {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--heading);
+    margin-bottom: 4px;
+  }
+
+  .tl-desc { font-size: 13px; color: var(--text2); margin-bottom: 0; }
+
+  /* ── PRINT ── */
+  @media print {
+    .sidebar { display: none; }
+    main { margin-left: 0; padding: 40px; }
+    .cover::before { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="app-name">SADE</div>
+    <div class="version">v1.0 — Especificación Técnica</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Visión General</div>
+    <a class="nav-item" href="#intro">Introducción</a>
+    <a class="nav-item" href="#stack">Stack Tecnológico</a>
+    <a class="nav-item" href="#arquitectura">Arquitectura</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Datos</div>
+    <a class="nav-item" href="#entidades">Entidades y Modelo</a>
+    <a class="nav-item" href="#parametros">Parámetros de Entrada</a>
+    <a class="nav-item" href="#indices">Índices por Especialidad</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Lógica</div>
+    <a class="nav-item" href="#algoritmo">Algoritmo Balderas</a>
+    <a class="nav-item" href="#restricciones">Restricciones (REQ)</a>
+    <a class="nav-item" href="#alertas">Sistema de Alertas</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Interfaz</div>
+    <a class="nav-item" href="#pantallas">Pantallas</a>
+    <a class="nav-item" href="#diseno">Sistema de Diseño</a>
+    <a class="nav-item" href="#exportacion">Exportación PDF</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Proyecto</div>
+    <a class="nav-item" href="#fases">Plan de Fases</a>
+    <a class="nav-item" href="#riesgos">Riesgos y Consideraciones</a>
+  </div>
+</nav>
+
+<!-- ══ MAIN ══ -->
+<main>
+
+  <!-- COVER -->
+  <div class="cover" id="intro">
+    <div class="cover-tag">Sistema de Gestión de Dotación de Enfermería</div>
+    <h1><span>SA</span>DE</h1>
+    <p>Especificación técnica completa para el desarrollo de una aplicación web de gestión de personal de enfermería, basada en la metodología Balderas Pedrero y la Ley 24.004.</p>
+    <div class="meta-row">
+      <div class="meta-item">
+        <span class="meta-label">Versión</span>
+        <span class="meta-value">1.0.0</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Paradigma</span>
+        <span class="meta-value">SPA Web — Desktop First</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Framework Legal</span>
+        <span class="meta-value">Ley 24.004 / Ley 10.780</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Metodología</span>
+        <span class="meta-value">Balderas Pedrero (UPE)</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Estilo UI</span>
+        <span class="meta-value">Dark Tech / Data Dashboard</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. STACK TECNOLÓGICO -->
+  <section id="stack">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Stack Tecnológico</h2>
+    </div>
+
+    <p>La arquitectura propuesta es una Single Page Application con backend REST desacoplado. Esta separación permite escalar el motor de cálculo de manera independiente al frontend y facilita futuras integraciones con sistemas hospitalarios (HIS/HER).</p>
+
+    <h3>Capas de la Aplicación</h3>
+    <div class="stack">
+      <div class="stack-layer" style="background:rgba(56,189,248,0.06);border-color:rgba(56,189,248,0.25);color:var(--accent)">
+        <span class="stack-layer-label">Frontend — Capa de Presentación</span>
+        <span class="stack-layer-tech">React 18 + TypeScript + Vite</span>
+      </div>
+      <div style="text-align:center;color:var(--text3);font-size:12px;font-family:var(--mono);padding:2px 0">↕ REST API / JSON</div>
+      <div class="stack-layer" style="background:rgba(129,140,248,0.06);border-color:rgba(129,140,248,0.25);color:var(--accent2)">
+        <span class="stack-layer-label">Backend — Lógica de Negocio</span>
+        <span class="stack-layer-tech">Node.js + Express + TypeScript</span>
+      </div>
+      <div style="text-align:center;color:var(--text3);font-size:12px;font-family:var(--mono);padding:2px 0">↕ ORM / Queries</div>
+      <div class="stack-layer" style="background:rgba(52,211,153,0.06);border-color:rgba(52,211,153,0.25);color:var(--accent3)">
+        <span class="stack-layer-label">Base de Datos</span>
+        <span class="stack-layer-tech">PostgreSQL 15 + Prisma ORM</span>
+      </div>
+    </div>
+
+    <div class="card-grid">
+      <div class="card accent-blue">
+        <div class="card-title">Frontend</div>
+        <p>
+          <span class="tag tag-blue">React 18</span>
+          <span class="tag tag-blue">TypeScript 5</span>
+          <span class="tag tag-blue">Vite</span>
+          <span class="tag tag-blue">Zustand</span>
+          <span class="tag tag-blue">TanStack Query</span>
+          <span class="tag tag-blue">React Hook Form</span>
+          <span class="tag tag-blue">Tailwind CSS</span>
+          <span class="tag tag-blue">Recharts</span>
+          <span class="tag tag-blue">jsPDF</span>
+        </p>
+      </div>
+      <div class="card accent-purple">
+        <div class="card-title">Backend</div>
+        <p>
+          <span class="tag tag-purple">Node.js 20 LTS</span>
+          <span class="tag tag-purple">Express 4</span>
+          <span class="tag tag-purple">TypeScript</span>
+          <span class="tag tag-purple">Prisma ORM</span>
+          <span class="tag tag-purple">Zod</span>
+          <span class="tag tag-purple">JWT Auth</span>
+          <span class="tag tag-purple">date-fns</span>
+          <span class="tag tag-purple">Winston</span>
+        </p>
+      </div>
+      <div class="card accent-green">
+        <div class="card-title">Infraestructura</div>
+        <p>
+          <span class="tag tag-green">PostgreSQL 15</span>
+          <span class="tag tag-green">Docker Compose</span>
+          <span class="tag tag-green">Nginx (proxy)</span>
+          <span class="tag tag-green">GitHub Actions CI</span>
+          <span class="tag tag-green">Railway / Render</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="alert alert-blue">
+      <span class="alert-icon">ℹ</span>
+      <span><strong>Desktop First:</strong> La grilla de turnos con 31 columnas requiere pantalla de al menos 1280px. En mobile se ofrecerá vista individual por enfermero (solo lectura). El diseño usa viewport mínimo de 1280px para la Pantalla 3.</span>
+    </div>
+  </section>
+
+  <!-- 2. ARQUITECTURA -->
+  <section id="arquitectura">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Arquitectura del Sistema</h2>
+    </div>
+
+    <h3>Estructura de Módulos Frontend</h3>
+    <div class="code-block" data-lang="tree">
+      <pre>src/
+├── <span class="kw">pages/</span>
+│   ├── LoginPage.tsx
+│   ├── DashboardPage.tsx          <span class="cm">← Pantalla 2</span>
+│   ├── ConfigPage.tsx             <span class="cm">← Pantalla 1</span>
+│   └── GridPage.tsx               <span class="cm">← Pantalla 3 (principal)</span>
+│
+├── <span class="kw">components/</span>
+│   ├── layout/
+│   │   ├── Topbar.tsx             <span class="cm">← Logo + Nav + Usuario</span>
+│   │   └── Sidebar.tsx
+│   ├── grid/
+│   │   ├── ShiftGrid.tsx          <span class="cm">← Grilla principal</span>
+│   │   ├── ShiftCell.tsx          <span class="cm">← Celda individual + alertas</span>
+│   │   ├── FrancoCounter.tsx      <span class="cm">← Contador dinámico por fila</span>
+│   │   └── DayHeader.tsx          <span class="cm">← Cabecera de día (feriado, fin de semana)</span>
+│   ├── dashboard/
+│   │   ├── DotacionSummary.tsx    <span class="cm">← Resultado del algoritmo</span>
+│   │   └── TurnoChart.tsx         <span class="cm">← Distribución por turno</span>
+│   └── staff/
+│       ├── StaffForm.tsx          <span class="cm">← ABM de personal</span>
+│       └── StaffTable.tsx
+│
+├── <span class="kw">store/</span>                         <span class="cm">← Estado global Zustand</span>
+│   ├── gridStore.ts               <span class="cm">← Estado de la planilla</span>
+│   ├── staffStore.ts
+│   └── configStore.ts
+│
+├── <span class="kw">services/</span>                      <span class="cm">← Llamadas a la API</span>
+│   ├── api.ts                     <span class="cm">← Cliente Axios + interceptores</span>
+│   ├── dotacion.service.ts
+│   ├── staff.service.ts
+│   └── grid.service.ts
+│
+├── <span class="kw">hooks/</span>
+│   ├── useShiftValidation.ts      <span class="cm">← Validaciones REQ-001 a REQ-006</span>
+│   ├── useFrancos.ts
+│   └── usePdf.ts                  <span class="cm">← Generación de planilla PDF</span>
+│
+└── <span class="kw">utils/</span>
+    ├── dotacion.calc.ts           <span class="cm">← Fórmulas P, B, Z, Q, S, V</span>
+    ├── francos.calc.ts
+    └── constants/
+        └── indices.ts             <span class="cm">← Base de datos de índices por especialidad</span></pre>
+    </div>
+
+    <h3>Endpoints de la API REST</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Método</th>
+            <th>Endpoint</th>
+            <th>Descripción</th>
+            <th>Auth</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="tag tag-green">POST</span></td><td><code>/api/auth/login</code></td><td>Autenticación JWT</td><td>—</td></tr>
+          <tr><td><span class="tag tag-blue">GET</span></td><td><code>/api/staff</code></td><td>Listar personal por servicio</td><td>✓</td></tr>
+          <tr><td><span class="tag tag-green">POST</span></td><td><code>/api/staff</code></td><td>Crear ficha de enfermero</td><td>✓</td></tr>
+          <tr><td><span class="tag tag-orange">PUT</span></td><td><code>/api/staff/:id</code></td><td>Actualizar ficha</td><td>✓</td></tr>
+          <tr><td><span class="tag tag-blue">GET</span></td><td><code>/api/services</code></td><td>Servicios e índices disponibles</td><td>✓</td></tr>
+          <tr><td><span class="tag tag-green">POST</span></td><td><code>/api/dotacion/calculate</code></td><td>Motor de cálculo Balderas</td><td>✓</td></tr>
+          <tr><td><span class="tag tag-blue">GET</span></td><td><code>/api/grid/:year/:month/:serviceId</code></td><td>Obtener planilla del mes</td><td>✓</td></tr>
+          <tr><td><span class="tag tag-orange">PUT</span></td><td><code>/api/grid/cell</code></td><td>Asignar/modificar turno en celda</td><td>✓</td></tr>
+          <tr><td><span class="tag tag-blue">GET</span></td><td><code>/api/grid/validate/:id</code></td><td>Ejecutar validaciones REQ sobre planilla</td><td>✓</td></tr>
+          <tr><td><span class="tag tag-blue">GET</span></td><td><code>/api/holidays/:year</code></td><td>Feriados nacionales del año</td><td>✓</td></tr>
+          <tr><td><span class="tag tag-blue">GET</span></td><td><code>/api/institutions/:id</code></td><td>Datos e imagen de la institución</td><td>✓</td></tr>
+          <tr><td><span class="tag tag-orange">PUT</span></td><td><code>/api/institutions/:id/logo</code></td><td>Upload de logo (multipart)</td><td>admin</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 3. ENTIDADES -->
+  <section id="entidades">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Entidades y Modelo de Datos</h2>
+    </div>
+
+    <p>El sistema opera sobre una jerarquía de tres niveles: <strong>Institución → Servicio → Puesto</strong>, con el personal asignado a servicios y los turnos registrados en la grilla mensual.</p>
+
+    <div class="entity-grid">
+      <div class="entity-card">
+        <div class="entity-header">Institución</div>
+        <ul class="entity-fields">
+          <li><span>id</span><span class="field-type">uuid PK</span></li>
+          <li><span>nombre</span><span class="field-type">varchar</span></li>
+          <li><span>logo_url</span><span class="field-type">text</span></li>
+          <li><span>nivel_complejidad</span><span class="field-type">enum(2,3)</span></li>
+          <li><span>created_at</span><span class="field-type">timestamp</span></li>
+        </ul>
+      </div>
+      <div class="entity-card">
+        <div class="entity-header">Servicio</div>
+        <ul class="entity-fields">
+          <li><span>id</span><span class="field-type">uuid PK</span></li>
+          <li><span>institucion_id</span><span class="field-type">uuid FK</span></li>
+          <li><span>nombre</span><span class="field-type">varchar</span></li>
+          <li><span>especialidad_key</span><span class="field-type">varchar</span></li>
+          <li><span>camas</span><span class="field-type">int</span></li>
+        </ul>
+      </div>
+      <div class="entity-card">
+        <div class="entity-header">Personal</div>
+        <ul class="entity-fields">
+          <li><span>id</span><span class="field-type">uuid PK</span></li>
+          <li><span>servicio_id</span><span class="field-type">uuid FK</span></li>
+          <li><span>nombre</span><span class="field-type">varchar</span></li>
+          <li><span>apellido</span><span class="field-type">varchar</span></li>
+          <li><span>dni</span><span class="field-type">varchar unique</span></li>
+          <li><span>matricula</span><span class="field-type">varchar unique</span></li>
+          <li><span>nivel_formacion</span><span class="field-type">enum</span></li>
+          <li><span>jornada_horas</span><span class="field-type">int(6|8)</span></li>
+          <li><span>turno_fijo</span><span class="field-type">enum(M,T,N,null)</span></li>
+          <li><span>antiguedad_años</span><span class="field-type">int</span></li>
+          <li><span>estado</span><span class="field-type">enum</span></li>
+          <li><span>created_at</span><span class="field-type">timestamp</span></li>
+        </ul>
+      </div>
+      <div class="entity-card">
+        <div class="entity-header">Planilla (Grid Header)</div>
+        <ul class="entity-fields">
+          <li><span>id</span><span class="field-type">uuid PK</span></li>
+          <li><span>servicio_id</span><span class="field-type">uuid FK</span></li>
+          <li><span>año</span><span class="field-type">int</span></li>
+          <li><span>mes</span><span class="field-type">int(1-12)</span></li>
+          <li><span>dias_mes</span><span class="field-type">int</span></li>
+          <li><span>feriados</span><span class="field-type">int[] (días)</span></li>
+          <li><span>estado</span><span class="field-type">enum(borrador,cerrada)</span></li>
+        </ul>
+      </div>
+      <div class="entity-card">
+        <div class="entity-header">Turno (Celda)</div>
+        <ul class="entity-fields">
+          <li><span>id</span><span class="field-type">uuid PK</span></li>
+          <li><span>planilla_id</span><span class="field-type">uuid FK</span></li>
+          <li><span>personal_id</span><span class="field-type">uuid FK</span></li>
+          <li><span>dia</span><span class="field-type">int(1-31)</span></li>
+          <li><span>tipo</span><span class="field-type">enum(M,T,N,F)</span></li>
+          <li><span>es_compensatorio</span><span class="field-type">boolean</span></li>
+          <li><span>alerta_nivel</span><span class="field-type">enum(null,Y,O,R)</span></li>
+          <li><span>updated_at</span><span class="field-type">timestamp</span></li>
+        </ul>
+      </div>
+      <div class="entity-card">
+        <div class="entity-header">Dotación Calculada</div>
+        <ul class="entity-fields">
+          <li><span>id</span><span class="field-type">uuid PK</span></li>
+          <li><span>planilla_id</span><span class="field-type">uuid FK</span></li>
+          <li><span>P</span><span class="field-type">decimal (base)</span></li>
+          <li><span>B</span><span class="field-type">decimal (ausentismo)</span></li>
+          <li><span>Z</span><span class="field-type">decimal (total)</span></li>
+          <li><span>Q_mañana</span><span class="field-type">decimal</span></li>
+          <li><span>Q_tarde</span><span class="field-type">decimal</span></li>
+          <li><span>Q_noche</span><span class="field-type">decimal</span></li>
+          <li><span>Q_franco</span><span class="field-type">decimal</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <h4>Enum: nivel_formacion</h4>
+    <p>
+      <span class="tag tag-blue">LICENCIADO</span>
+      <span class="tag tag-blue">ENFERMERO_PROFESIONAL</span>
+      <span class="tag tag-blue">ENFERMERO_ESPECIALISTA</span>
+      <span class="tag tag-orange">AUXILIAR</span>
+    </p>
+
+    <h4>Enum: estado (Personal)</h4>
+    <p>
+      <span class="tag tag-green">ACTIVO</span>
+      <span class="tag tag-orange">VACACIONES</span>
+      <span class="tag tag-red">LICENCIA_ENFERMEDAD</span>
+      <span class="tag tag-purple">CAPACITACION</span>
+    </p>
+  </section>
+
+  <!-- 4. PARÁMETROS -->
+  <section id="parametros">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Parámetros de Entrada</h2>
+    </div>
+
+    <p>Variables que el usuario configura en la <strong>Pantalla 1</strong> para inicializar el motor de cálculo. Todos los campos son requeridos para generar el dashboard de dotación.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Variable</th>
+            <th>Símbolo</th>
+            <th>Tipo</th>
+            <th>Descripción</th>
+            <th>Restricción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Servicio / Área</td>
+            <td><code>—</code></td>
+            <td>SELECT</td>
+            <td>Selección del área. Autocompletará el índice I</td>
+            <td>Obligatorio</td>
+          </tr>
+          <tr>
+            <td>Índice de cuidado</td>
+            <td><code>I</code></td>
+            <td>Float</td>
+            <td>Hs. de cuidado/paciente/24hs. Se carga automáticamente según servicio, con opción de ajuste manual dentro del rango permitido</td>
+            <td>Solo lectura por defecto</td>
+          </tr>
+          <tr>
+            <td>Camas ocupadas</td>
+            <td><code>C</code></td>
+            <td>Int</td>
+            <td>Unidades de internación disponibles u ocupadas</td>
+            <td>≥ 1</td>
+          </tr>
+          <tr>
+            <td>Jornada laboral</td>
+            <td><code>J</code></td>
+            <td>Constante</td>
+            <td>Horas diarias por profesional. Estándar = 8hs</td>
+            <td>Fijo = 8</td>
+          </tr>
+          <tr>
+            <td>Mes y año</td>
+            <td><code>—</code></td>
+            <td>DatePicker</td>
+            <td>Define días del mes y feriados nacionales del período</td>
+            <td>Obligatorio</td>
+          </tr>
+          <tr>
+            <td>Nivel de complejidad</td>
+            <td><code>NC</code></td>
+            <td>Enum(2|3)</td>
+            <td>Define el ratio de profesionalización (70/30 ó 80/20)</td>
+            <td>Obligatorio</td>
+          </tr>
+          <tr>
+            <td>Feriados del mes</td>
+            <td><code>F[]</code></td>
+            <td>Int[]</td>
+            <td>Días marcados como feriado en el mini-calendario. Afecta REQ-001, REQ-002 y REQ-003</td>
+            <td>Cargado automáticamente con opción de edición manual</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5. ÍNDICES -->
+  <section id="indices">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Índices por Especialidad</h2>
+    </div>
+
+    <p>Base de datos inmutable embebida en el frontend (<code>constants/indices.ts</code>). Cuando el usuario selecciona un servicio, el índice <code>I</code> se autocompletará con el rango correspondiente. El valor editable por el usuario queda limitado a ese rango.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Categoría</th>
+            <th>Especialidad</th>
+            <th>Índice I (rango)</th>
+            <th>Perfil requerido</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Clínica</td><td>Medicina Interna / Infectología</td><td>4.0 – 4.8</td><td>Enfermero Profesional</td></tr>
+          <tr><td>Clínica</td><td>Cardiología</td><td>3.0 – 3.4</td><td>Enfermero Profesional</td></tr>
+          <tr><td>Clínica</td><td>Perinatología</td><td>8.0 – 12.0</td><td>Enfermero Profesional</td></tr>
+          <tr><td>Quirúrgica</td><td>Cirugía General</td><td>3.4 – 4.0</td><td>Enfermero Profesional</td></tr>
+          <tr><td>Quirúrgica</td><td>Cirugía Cardiovascular / Traumatología</td><td>4.0 – 4.8</td><td>Enfermero Profesional</td></tr>
+          <tr><td>Crítica</td><td>Cuidados Intensivos (adultos)</td><td>—</td><td>1 EE cada 2 camas a 1 EE/cama</td></tr>
+          <tr><td>Pediátrica</td><td>UCI Pediátrica / Neonatología</td><td>8.0 – 12.0</td><td>Enfermero Especialista</td></tr>
+          <tr><td>Pediátrica</td><td>Prematuros</td><td>5.0 – 8.0</td><td>Enfermero Profesional</td></tr>
+          <tr><td>Ambulatorio</td><td>Admisión Hospitalaria</td><td>—</td><td>1 AE por turno</td></tr>
+          <tr><td>Recuperación</td><td>Sala de Recuperación</td><td>Variable</td><td>EG según ratio</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alert alert-orange">
+      <span class="alert-icon">⚠</span>
+      <span>Para áreas críticas (UCI adultos), el campo I se reemplaza por un selector de ratio (1:2 a 1:1) en la Pantalla 1. El sistema calculará la dotación directamente desde el número de camas, sin aplicar la fórmula estándar P = (I × C) / J.</span>
+    </div>
+  </section>
+
+  <!-- 6. ALGORITMO -->
+  <section id="algoritmo">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Algoritmo de Cálculo — Metodología Balderas Pedrero</h2>
+    </div>
+
+    <p>El motor de cálculo ejecuta 5 pasos secuenciales. Todos los resultados se redondean al entero superior (<code>Math.ceil</code>) para garantizar cobertura. La función reside en <code>utils/dotacion.calc.ts</code> y es ejecutada tanto en el cliente (preview) como en el servidor (validación definitiva).</p>
+
+    <h3>Paso 1 — Personal Base (P)</h3>
+    <p>Determina la dotación teórica ideal para cubrir 24 horas continuas de servicio.</p>
+    <div class="formula">
+      <div>
+        <span>P = (I × C) / J</span>
+        <span class="label">Personal Base</span>
+      </div>
+      <div>
+        <span>I = índice cuidado</span>
+        <span class="label">C = camas &nbsp; J = 8hs</span>
+      </div>
+    </div>
+
+    <h3>Paso 2 — Ausentismo Previsible (B)</h3>
+    <p>Calcula el colchón de personal necesario para cubrir descansos, vacaciones y licencias. El coeficiente 0.41 (41%) está estandarizado por la Guía Técnica y es constante.</p>
+    <div class="formula">
+      <span>B = P × 0.41</span>
+    </div>
+
+    <h3>Paso 3 — Dotación Total Requerida (Z)</h3>
+    <div class="formula">
+      <span>Z = P + B</span>
+    </div>
+
+    <h3>Paso 4 — Distribución por Turno (Q)</h3>
+    <p>Segmentación de Z según franjas horarias. La sumatoria de los cuatro tramos debe ser 100%.</p>
+    <div class="formula">
+      <div>
+        <span>Q₁ = Z × 0.35</span>
+        <span class="label">Mañana (H1)</span>
+      </div>
+      <div>
+        <span>Q₂ = Z × 0.25</span>
+        <span class="label">Tarde (H2)</span>
+      </div>
+      <div>
+        <span>Q₃ = Z × 0.20</span>
+        <span class="label">Noche (H3)</span>
+      </div>
+      <div>
+        <span>Qf = Z × 0.20</span>
+        <span class="label">Francos</span>
+      </div>
+    </div>
+    <div class="alert alert-red">
+      <span class="alert-icon">✗</span>
+      <span><strong>Validación crítica:</strong> El sistema debe verificar que Q₁ + Q₂ + Q₃ + Qf = Z (100%). Si la suma difiere por error de redondeo, se ajusta Qf en ±1. Un error superior al 1% debe lanzar excepción.</span>
+    </div>
+
+    <h3>Paso 5 — Composición Profesional (S / V)</h3>
+    <p>Aplicado por turno sobre cada Q, según el nivel de complejidad configurado.</p>
+    <div class="formula">
+      <div>
+        <span>2° Nivel</span>
+        <span class="label">S = Q × 0.70 &nbsp;|&nbsp; V = Q × 0.30</span>
+      </div>
+      <div>
+        <span>3° Nivel</span>
+        <span class="label">S = Q × 0.80 &nbsp;|&nbsp; V = Q × 0.20</span>
+      </div>
+    </div>
+
+    <h3>Implementación de referencia</h3>
+    <div class="code-block" data-lang="typescript">
+      <pre><span class="kw">export interface</span> <span class="fn">DotacionInput</span> {
+  I: <span class="kw">number</span>; C: <span class="kw">number</span>; J: <span class="num">8</span>;
+  nivel: <span class="str">'segundo'</span> | <span class="str">'tercero'</span>;
+}
+
+<span class="kw">export function</span> <span class="fn">calcularDotacion</span>(input: DotacionInput) {
+  <span class="kw">const</span> { I, C, J, nivel } = input;
+
+  <span class="cm">// Paso 1-3</span>
+  <span class="kw">const</span> P = (I * C) / J;
+  <span class="kw">const</span> B = P * <span class="num">0.41</span>;
+  <span class="kw">const</span> Z = P + B;
+
+  <span class="cm">// Paso 4 — distribución</span>
+  <span class="kw">const</span> Q1 = Math.ceil(Z * <span class="num">0.35</span>); <span class="cm">// Mañana</span>
+  <span class="kw">const</span> Q2 = Math.ceil(Z * <span class="num">0.25</span>); <span class="cm">// Tarde</span>
+  <span class="kw">const</span> Q3 = Math.ceil(Z * <span class="num">0.20</span>); <span class="cm">// Noche</span>
+  <span class="kw">const</span> Qf = Math.ceil(Z * <span class="num">0.20</span>); <span class="cm">// Francos</span>
+
+  <span class="cm">// Paso 5 — composición profesional</span>
+  <span class="kw">const</span> ratio = nivel === <span class="str">'tercero'</span> ? <span class="num">0.80</span> : <span class="num">0.70</span>;
+  <span class="kw">const</span> profesionales = Math.ceil(Z * ratio);
+  <span class="kw">const</span> auxiliares = Math.ceil(Z * (<span class="num">1</span> - ratio));
+
+  <span class="kw">return</span> { P, B, Z, Q1, Q2, Q3, Qf, profesionales, auxiliares };
+}</pre>
+    </div>
+  </section>
+
+  <!-- 7. RESTRICCIONES -->
+  <section id="restricciones">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>Restricciones de Validación (REQ-001 a REQ-006)</h2>
+    </div>
+
+    <p>Estas reglas son validadas en tiempo real en el hook <code>useShiftValidation.ts</code> al asignar o modificar cualquier celda. Una restricción crítica bloquea la acción; las de precaución muestran alerta pero permiten continuar con confirmación.</p>
+
+    <ul class="req-list">
+      <li class="req-item">
+        <span class="req-id green">REQ-001</span>
+        <div class="req-text">
+          <strong>Base de Francos:</strong> Si <code>mes_dias = 28, 29 ó 30</code> → asignar <strong>8 francos</strong>; si <code>= 31</code> → <strong>9 francos</strong>. Es el valor inicial del contador dinámico de cada enfermero.
+        </div>
+      </li>
+      <li class="req-item">
+        <span class="req-id green">REQ-002</span>
+        <div class="req-text">
+          <strong>Ajuste por Feriado:</strong> Por cada feriado nacional marcado en el mes, <code>Francos_Totales = Base_Francos + 1</code>. La base se recalcula automáticamente al marcar/desmarcar feriados en Pantalla 1.
+        </div>
+      </li>
+      <li class="req-item">
+        <span class="req-id green">REQ-003</span>
+        <div class="req-text">
+          <strong>Franco Compensatorio:</strong> Si la celda asignada corresponde a un día feriado Y el turno es M o T → la celda se pinta amarillo, se suma +1 al contador de francos compensatorios del enfermero, y una notificación advierte al usuario. Si el feriado cae el último día del mes, el compensatorio se traslada al mes siguiente (campo <code>compensatorio_pendiente</code> en la entidad Personal).
+        </div>
+      </li>
+      <li class="req-item">
+        <span class="req-id">REQ-004</span>
+        <div class="req-text">
+          <strong>Fatiga Circadiana — BLOQUEO:</strong> Prohibido asignar más de 3 turnos N consecutivos. Al intentar asignar el 4° N consecutivo, el sistema bloquea la acción (celda no modificable) y muestra alerta roja: <em>"Límite de 3 turnos nocturnos consecutivos alcanzado."</em>
+        </div>
+      </li>
+      <li class="req-item">
+        <span class="req-id">REQ-005</span>
+        <div class="req-text">
+          <strong>Continuidad Laboral — BLOQUEO:</strong> Máximo 5 días consecutivos de trabajo (M, T o N) sin un F. Al intentar asignar el 6° día sin franco, el sistema bloquea. Alerta roja: <em>"Máximo de 5 días consecutivos sin franco superado."</em>
+        </div>
+      </li>
+      <li class="req-item">
+        <span class="req-id">REQ-006</span>
+        <div class="req-text">
+          <strong>Descanso Inter-Jornada — PRECAUCIÓN:</strong> Mínimo 16 horas entre turno y turno. Regla específica: si <code>día[n] = T</code> (finaliza 22:00) y <code>día[n+1] = M</code> (inicia 06:00) → solo hay 8 horas de descanso → alerta naranja. El sistema <em>no bloquea</em> pero muestra confirmación obligatoria: <em>"¿Confirmar turno? Viola 16hs de descanso mínimo."</em>
+        </div>
+      </li>
+    </ul>
+
+    <h3>Regla adicional: supervisión de Auxiliares</h3>
+    <div class="alert alert-red">
+      <span class="alert-icon">✗</span>
+      <span><strong>REQ-007 (implícito):</strong> Si al validar un turno (M, T o N) todos los enfermeros asignados tienen nivel_formacion = AUXILIAR, el sistema muestra alerta roja: <em>"El turno no tiene supervisión profesional. El nivel auxiliar requiere supervisión de un Enfermero Profesional."</em> Esta regla surge de la Ley 24.004.</span>
+    </div>
+  </section>
+
+  <!-- 8. ALERTAS -->
+  <section id="alertas">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>Sistema de Alertas — Semáforo Visual</h2>
+    </div>
+
+    <p>Las celdas de la grilla cambian de color según el tipo de infracción detectada. Las alertas son acumulables (una celda puede ser naranja y amarilla simultáneamente). En ese caso se aplica el color de mayor prioridad (rojo > naranja > amarillo).</p>
+
+    <div class="card accent-red">
+      <div class="card-title" style="color:var(--accent5)">🔴 Alerta Roja — Restricción Crítica (BLOQUEANTE)</div>
+      <p><strong>Disparadores:</strong> REQ-004 (+3 noches consecutivas), REQ-005 (+5 días sin franco), REQ-007 (turno solo con Auxiliares).</p>
+      <p style="margin-top:8px"><strong>Comportamiento:</strong> La celda queda bloqueada y no puede modificarse. El sistema muestra un tooltip con la causa. El administrador puede desbloquear manualmente con contraseña de supervisor (modo override, queda logueado en auditoría).</p>
+    </div>
+
+    <div class="card accent-orange">
+      <div class="card-title" style="color:var(--accent4)">🟠 Alerta Naranja — Precaución de Descanso</div>
+      <p><strong>Disparador:</strong> REQ-006 — menos de 16 horas entre turno T y turno M del día siguiente.</p>
+      <p style="margin-top:8px"><strong>Comportamiento:</strong> Modal de confirmación con dos opciones: cancelar la asignación o confirmar forzando (requiere confirmación explícita). Si se confirma, la celda queda marcada en naranja.</p>
+    </div>
+
+    <div class="card accent-orange" style="border-left-color:var(--accent)">
+      <div class="card-title" style="color:#fbbf24">🟡 Alerta Amarilla — Compensatorio / Fin de Semana</div>
+      <p><strong>Disparadores:</strong> Turno asignado en día feriado (REQ-003); fin de mes próximo sin fin de semana libre detectado.</p>
+      <p style="margin-top:8px"><strong>Comportamiento:</strong> La celda se pinta amarillo suave. No bloquea ni pide confirmación. El contador de francos compensatorios se actualiza automáticamente.</p>
+    </div>
+
+    <div class="card accent-green">
+      <div class="card-title" style="color:var(--accent3)">🟢 Indicador Verde — Franco Cumplido</div>
+      <p><strong>Disparador:</strong> El contador de francos restantes llega a 0.</p>
+      <p style="margin-top:8px"><strong>Comportamiento:</strong> El contador al final de la fila cambia a verde. Indica que se han respetado todos los derechos de descanso del trabajador en ese mes.</p>
+    </div>
+
+    <h3>Lógica del Contador de Francos por Fila</h3>
+    <div class="code-block" data-lang="typescript">
+      <pre><span class="cm">// Valor inicial calculado en useEffect al cargar la planilla</span>
+<span class="kw">const</span> <span class="fn">calcFrancosBase</span> = (diasMes: <span class="kw">number</span>, feriados: <span class="kw">number</span>[]): <span class="kw">number</span> => {
+  <span class="kw">const</span> base = diasMes &lt;= <span class="num">29</span> ? <span class="num">7</span> : diasMes === <span class="num">30</span> ? <span class="num">8</span> : <span class="num">9</span>;
+  <span class="kw">return</span> base + feriados.<span class="fn">length</span>; <span class="cm">// REQ-002</span>
+};
+
+<span class="cm">// Se descuenta 1 por cada celda tipo 'F' asignada al enfermero</span>
+<span class="kw">const</span> francosRestantes = francosBase - turnos.<span class="fn">filter</span>(t => t.tipo === <span class="str">'F'</span>).<span class="fn">length</span>;</pre>
+    </div>
+  </section>
+
+  <!-- 9. PANTALLAS -->
+  <section id="pantallas">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2>Diseño de Pantallas</h2>
+    </div>
+
+    <h3>Pantalla 0 — Topbar Global (Persistente)</h3>
+    <div class="wireframe">
+      <div class="wf-topbar">
+        <span>[LOGO INSTITUCIÓN]</span>
+        <span style="flex:1;text-align:center;color:var(--text2)">Nombre del Establecimiento — Servicio Activo</span>
+        <span>Mes/Año &nbsp; | &nbsp; Usuario &nbsp; | &nbsp; Cerrar sesión</span>
+      </div>
+      <div class="wf-body" style="padding:12px 16px">
+        <div class="wf-row">
+          <div class="wf-block highlight">⚙ Configuración del Mes</div>
+          <div class="wf-block">📊 Resumen de Dotación</div>
+          <div class="wf-block">📋 Planilla de Turnos</div>
+          <div class="wf-block" style="margin-left:auto">🖨 Exportar PDF</div>
+        </div>
+      </div>
+    </div>
+    <p>El logo de la institución se muestra siempre en la esquina superior izquierda del topbar. Al exportar PDF, el mismo logo aparece en el encabezado del documento impreso.</p>
+
+    <h3>Pantalla 1 — Configuración del Mes</h3>
+    <div class="wireframe">
+      <div class="wf-topbar">
+        Pantalla 1 — Configuración del Mes
+      </div>
+      <div class="wf-body">
+        <div class="wf-row">
+          <div class="wf-block" style="flex:1">
+            <strong>Servicio</strong><br>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent)">[SELECT] Terapia Intensiva</span>
+          </div>
+          <div class="wf-block" style="flex:1">
+            <strong>Mes / Año</strong><br>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent)">[DATEPICKER] Junio 2025</span>
+          </div>
+          <div class="wf-block" style="flex:1">
+            <strong>Nivel de Complejidad</strong><br>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent)">[RADIO] ● 2do Nivel &nbsp; ○ 3er Nivel</span>
+          </div>
+        </div>
+        <div class="wf-row">
+          <div class="wf-block" style="flex:1">
+            <strong>Camas disponibles</strong><br>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent)">[NUMBER INPUT] 12</span>
+          </div>
+          <div class="wf-block" style="flex:2">
+            <strong>Índice I (autocompletado desde base de datos)</strong><br>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent)">Rango: 8.0 – 12.0 hs &nbsp; [SLIDER] → 10.0</span>
+          </div>
+        </div>
+        <div class="wf-row">
+          <div class="wf-block" style="flex:1">
+            <strong>Feriados del mes</strong><br>
+            <span style="font-size:11px;color:var(--text3)">Mini-calendario interactivo. Días marcados = feriados nacionales (precargados). Click para agregar/quitar.</span>
+          </div>
+          <div class="wf-block highlight" style="flex:0 0 auto;align-self:center">
+            ✓ Calcular Dotación →
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Pantalla 2 — Dashboard de Dotación</h3>
+    <div class="wireframe">
+      <div class="wf-topbar">Pantalla 2 — Resumen de Dotación Calculada</div>
+      <div class="wf-body">
+        <div class="wf-row">
+          <div class="wf-block" style="flex:1;text-align:center"><span style="font-size:22px;color:var(--accent);font-family:var(--display);font-weight:700">21</span><br><span style="font-size:11px;color:var(--text3)">Personal Base (P)</span></div>
+          <div class="wf-block" style="flex:1;text-align:center"><span style="font-size:22px;color:var(--accent4);font-family:var(--display);font-weight:700">9</span><br><span style="font-size:11px;color:var(--text3)">Ausentismo (B)</span></div>
+          <div class="wf-block highlight" style="flex:1;text-align:center"><span style="font-size:28px;font-family:var(--display);font-weight:700">30</span><br><span style="font-size:11px">Total Requerido (Z)</span></div>
+        </div>
+        <div class="wf-row">
+          <div class="wf-block" style="flex:1;text-align:center"><span style="font-size:20px;font-family:var(--display)">11</span><br><span style="font-size:11px;color:var(--text3)">Mañana (Q₁)</span></div>
+          <div class="wf-block" style="flex:1;text-align:center"><span style="font-size:20px;font-family:var(--display)">8</span><br><span style="font-size:11px;color:var(--text3)">Tarde (Q₂)</span></div>
+          <div class="wf-block" style="flex:1;text-align:center"><span style="font-size:20px;font-family:var(--display)">6</span><br><span style="font-size:11px;color:var(--text3)">Noche (Q₃)</span></div>
+          <div class="wf-block" style="flex:1;text-align:center"><span style="font-size:20px;font-family:var(--display)">6</span><br><span style="font-size:11px;color:var(--text3)">Francos (Qf)</span></div>
+        </div>
+        <div class="wf-row">
+          <div class="wf-block" style="flex:1;color:var(--accent3)">■ Profesionales (80%): 24</div>
+          <div class="wf-block" style="flex:1;color:var(--accent4)">■ Auxiliares (20%): 6</div>
+          <div class="wf-block" style="flex:2;font-size:11px;color:var(--text3)">[Gráfico de dona con distribución por turno y nivel]</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Pantalla 3 — La Grilla Interactiva (Principal)</h3>
+    <p>Esta es la pantalla de uso diario. La grilla se carga con todo el personal <strong>Activo</strong> del servicio. El personal en Vacaciones, Licencia o Capacitación no aparece en filas asignables.</p>
+    <div class="wireframe">
+      <div class="wf-topbar">Pantalla 3 — Planilla de Turnos · Terapia Intensiva · Junio 2025</div>
+      <div class="wf-body" style="overflow-x:auto;padding:12px">
+        <table style="font-size:11px;min-width:700px">
+          <thead>
+            <tr>
+              <th style="width:130px;text-align:left;background:transparent;color:var(--text3);font-size:10px">PERSONAL</th>
+              <th style="background:rgba(56,189,248,0.08);color:var(--accent);font-size:10px">L 1</th>
+              <th style="background:rgba(56,189,248,0.08);color:var(--accent);font-size:10px">M 2</th>
+              <th style="background:rgba(255,255,255,0.03);color:var(--text3);font-size:10px">M 3</th>
+              <th style="background:rgba(255,255,255,0.03);color:var(--text3);font-size:10px">J 4</th>
+              <th style="background:rgba(255,255,255,0.03);color:var(--text3);font-size:10px">V 5</th>
+              <th style="background:rgba(255,255,255,0.08);color:var(--text3);font-size:10px">S 6</th>
+              <th style="background:rgba(255,255,255,0.08);color:var(--text3);font-size:10px">D 7</th>
+              <th style="background:transparent;color:var(--text3);font-size:10px">…</th>
+              <th style="background:transparent;color:var(--accent3);font-size:10px">FRANCOS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:var(--text2);font-size:12px">García, M. &nbsp;<span style="color:var(--accent3);font-size:10px">PRO</span></td>
+              <td><div class="wf-block" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">M</div></td>
+              <td><div class="wf-block" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">T</div></td>
+              <td><div class="wf-block green-ok" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">F</div></td>
+              <td><div class="wf-block" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">M</div></td>
+              <td><div class="wf-block" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">M</div></td>
+              <td><div class="wf-block" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">T</div></td>
+              <td><div class="wf-block green-ok" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">F</div></td>
+              <td style="color:var(--text3)">…</td>
+              <td style="text-align:center;color:var(--accent4);font-weight:600;font-family:var(--mono)">7/9 🟡</td>
+            </tr>
+            <tr>
+              <td style="color:var(--text2);font-size:12px">López, A. &nbsp;<span style="color:var(--accent3);font-size:10px">PRO</span></td>
+              <td><div class="wf-block" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">N</div></td>
+              <td><div class="wf-block" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">N</div></td>
+              <td><div class="wf-block" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">N</div></td>
+              <td><div class="wf-block red-alert" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">✗ N</div></td>
+              <td><div class="wf-block green-ok" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">F</div></td>
+              <td><div class="wf-block" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">M</div></td>
+              <td><div class="wf-block" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">T</div></td>
+              <td style="color:var(--text3)">…</td>
+              <td style="text-align:center;color:var(--accent5);font-weight:600;font-family:var(--mono)">8/9 🔴</td>
+            </tr>
+            <tr>
+              <td style="color:var(--text2);font-size:12px">Pérez, R. &nbsp;<span style="color:var(--accent4);font-size:10px">AUX</span></td>
+              <td><div class="wf-block orange-alert" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">T→M</div></td>
+              <td><div class="wf-block" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">M</div></td>
+              <td><div class="wf-block" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">M</div></td>
+              <td><div class="wf-block green-ok" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">F</div></td>
+              <td><div class="wf-block" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">T</div></td>
+              <td><div class="wf-block" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">N</div></td>
+              <td><div class="wf-block" style="padding:4px 6px;text-align:center;font-family:var(--mono);font-size:12px">N</div></td>
+              <td style="color:var(--text3)">…</td>
+              <td style="text-align:center;color:var(--accent3);font-weight:600;font-family:var(--mono)">9/9 🟢</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+          <span style="font-size:11px;color:var(--text3)">Leyenda: </span>
+          <span class="wf-block" style="padding:3px 8px;font-size:11px">M = Mañana</span>
+          <span class="wf-block" style="padding:3px 8px;font-size:11px">T = Tarde</span>
+          <span class="wf-block" style="padding:3px 8px;font-size:11px">N = Noche</span>
+          <span class="wf-block green-ok" style="padding:3px 8px;font-size:11px">F = Franco</span>
+          <span class="wf-block red-alert" style="padding:3px 8px;font-size:11px">✗ = Bloqueado</span>
+          <span class="wf-block orange-alert" style="padding:3px 8px;font-size:11px">⚠ = Precaución</span>
+        </div>
+      </div>
+    </div>
+
+    <h4>Interacción de celdas</h4>
+    <ul class="req-list">
+      <li class="req-item">
+        <span class="req-id blue">UX-01</span>
+        <div class="req-text"><strong>Click en celda vacía:</strong> Dropdown inline con opciones M / T / N / F. Teclas rápidas de teclado: presionar M, T, N o F asigna el turno directamente sin abrir dropdown.</div>
+      </li>
+      <li class="req-item">
+        <span class="req-id blue">UX-02</span>
+        <div class="req-text"><strong>Click en celda ocupada:</strong> Dropdown con opciones de cambio + opción "Limpiar". Al limpiar, el contador de francos se actualiza en tiempo real.</div>
+      </li>
+      <li class="req-item">
+        <span class="req-id blue">UX-03</span>
+        <div class="req-text"><strong>Hover sobre celda con alerta:</strong> Tooltip con descripción de la restricción violada y el artículo legal que la sustenta (ej. "REQ-004 — Ley 24.004").</div>
+      </li>
+      <li class="req-item">
+        <span class="req-id blue">UX-04</span>
+        <div class="req-text"><strong>Columnas de fin de semana:</strong> Fondo ligeramente diferenciado para Sábado y Domingo (Sat/Sun). Columnas de feriados marcadas con fondo durazno y ícono de bandera.</div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- 10. DISEÑO -->
+  <section id="diseno">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2>Sistema de Diseño</h2>
+    </div>
+
+    <p>SADE utiliza una estética <strong>Dark Tech / Data Dashboard</strong>: fondos oscuros profundos, tipografía de alto contraste, acentos cyan/índigo y textos monoespacio para datos críticos. El objetivo es que la app se sienta como un sistema de control médico profesional, no como una planilla de Excel.</p>
+
+    <h3>Paleta de Color</h3>
+    <div class="color-grid">
+      <div class="color-chip" style="background:#0a0e1a"><span class="chip-dark chip-name">#0a0e1a<br>Background</span></div>
+      <div class="color-chip" style="background:#111827"><span class="chip-dark chip-name">#111827<br>Surface</span></div>
+      <div class="color-chip" style="background:#38bdf8"><span class="chip-name" style="color:rgba(0,0,0,0.7)">#38bdf8<br>Accent Cyan</span></div>
+      <div class="color-chip" style="background:#818cf8"><span class="chip-name" style="color:rgba(0,0,0,0.6)">#818cf8<br>Accent Indigo</span></div>
+      <div class="color-chip" style="background:#34d399"><span class="chip-name" style="color:rgba(0,0,0,0.7)">#34d399<br>Success</span></div>
+    </div>
+    <div class="color-grid">
+      <div class="color-chip" style="background:#fb923c"><span class="chip-name" style="color:rgba(0,0,0,0.7)">#fb923c<br>Warning</span></div>
+      <div class="color-chip" style="background:#f87171"><span class="chip-name" style="color:rgba(0,0,0,0.7)">#f87171<br>Danger</span></div>
+      <div class="color-chip" style="background:#fde68a"><span class="chip-name" style="color:rgba(0,0,0,0.6)">#fde68a<br>Amarillo (REQ-003)</span></div>
+      <div class="color-chip" style="background:#1e3a5f"><span class="chip-dark chip-name">#1e3a5f<br>Celda Feriado</span></div>
+      <div class="color-chip" style="background:#1a2235"><span class="chip-dark chip-name">#1a2235<br>Surface 2</span></div>
+    </div>
+
+    <h3>Tipografía</h3>
+    <div class="type-demo">
+      <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--heading);letter-spacing:-1px;margin-bottom:8px">Syne — Headings y Display</div>
+      <div style="font-family:'Inter',sans-serif;font-size:15px;font-weight:300;color:var(--text2);margin-bottom:8px">Inter Light — Cuerpo de texto y descripciones. Lorem ipsum dolor sit amet, consectetur adipiscing.</div>
+      <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);margin-bottom:8px">DM Mono — Datos críticos: M  T  N  F  ·  P = 21.0  ·  Z = 29.6  ·  REQ-004</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">
+        <span class="tag tag-green">ACTIVO</span>
+        <span class="tag tag-orange">VACACIONES</span>
+        <span class="tag tag-red">LICENCIA</span>
+        <span class="tag tag-blue">PROFESIONAL</span>
+        <span class="tag tag-purple">ESPECIALISTA</span>
+      </div>
+    </div>
+
+    <h3>Identidad Visual — Logo SADE</h3>
+    <p>El sistema de logo de SADE consta de tres variantes oficiales según el contexto de uso. El símbolo es una <strong>cruz médica construida dentro de un rombo</strong>, que combina la referencia sanitaria con una geometría de precisión técnica.</p>
+
+    <!-- VARIANTE 1: Principal fondo oscuro -->
+    <h4>Variante 1 — Principal (app / topbar)</h4>
+    <div style="background:#0f172a;border:1px solid rgba(99,179,237,0.15);border-radius:12px;padding:32px;display:flex;align-items:center;justify-content:center;margin-bottom:8px">
+      <svg width="380" height="100" viewBox="0 0 380 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="380" height="100" rx="12" fill="#0a0e1a"/>
+        <g transform="translate(36,50)">
+          <polygon points="0,-28 28,0 0,28 -28,0" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.5"/>
+          <rect x="-4" y="-20" width="8" height="40" rx="2" fill="#38bdf8"/>
+          <rect x="-20" y="-4" width="40" height="8" rx="2" fill="#38bdf8"/>
+          <circle cx="0" cy="0" r="5" fill="#0a0e1a"/>
+          <circle cx="0" cy="0" r="3" fill="#38bdf8"/>
+        </g>
+        <text x="80" y="43" font-family="Syne, sans-serif" font-size="42" font-weight="800" fill="#f1f5f9" letter-spacing="-2">SADE</text>
+        <text x="81" y="63" font-family="DM Mono, monospace" font-size="8" fill="#38bdf8" letter-spacing="1.2">SISTEMA AUTOMATIZADO DE DOTACIÓN DE ENFERMERÍA</text>
+      </svg>
+    </div>
+    <p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);text-align:center;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:24px">Uso: topbar de la aplicación, pantalla de login</p>
+
+    <!-- VARIANTE 2: App icon -->
+    <h4>Variante 2 — Ícono de aplicación</h4>
+    <div style="background:#0f172a;border:1px solid rgba(99,179,237,0.15);border-radius:12px;padding:32px;display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:8px">
+      <svg width="90" height="90" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+        <rect width="90" height="90" rx="18" fill="#0a0e1a"/>
+        <g transform="translate(45,45)">
+          <polygon points="0,-30 30,0 0,30 -30,0" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.4"/>
+          <rect x="-5" y="-22" width="10" height="44" rx="2.5" fill="#38bdf8"/>
+          <rect x="-22" y="-5" width="44" height="10" rx="2.5" fill="#38bdf8"/>
+          <circle cx="0" cy="0" r="6" fill="#0a0e1a"/>
+          <circle cx="0" cy="0" r="3.5" fill="#38bdf8"/>
+        </g>
+      </svg>
+      <svg width="60" height="60" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+        <rect width="90" height="90" rx="18" fill="#0a0e1a"/>
+        <g transform="translate(45,45)">
+          <polygon points="0,-30 30,0 0,30 -30,0" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.4"/>
+          <rect x="-5" y="-22" width="10" height="44" rx="2.5" fill="#38bdf8"/>
+          <rect x="-22" y="-5" width="44" height="10" rx="2.5" fill="#38bdf8"/>
+          <circle cx="0" cy="0" r="6" fill="#0a0e1a"/>
+          <circle cx="0" cy="0" r="3.5" fill="#38bdf8"/>
+        </g>
+      </svg>
+      <svg width="40" height="40" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+        <rect width="90" height="90" rx="18" fill="#0a0e1a"/>
+        <g transform="translate(45,45)">
+          <polygon points="0,-30 30,0 0,30 -30,0" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.4"/>
+          <rect x="-5" y="-22" width="10" height="44" rx="2.5" fill="#38bdf8"/>
+          <rect x="-22" y="-5" width="44" height="10" rx="2.5" fill="#38bdf8"/>
+          <circle cx="0" cy="0" r="6" fill="#0a0e1a"/>
+          <circle cx="0" cy="0" r="3.5" fill="#38bdf8"/>
+        </g>
+      </svg>
+    </div>
+    <p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);text-align:center;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:24px">Uso: favicon, acceso directo de escritorio (90×90 / 60×60 / 40×40 px)</p>
+
+    <!-- VARIANTE 3: Fondo claro PDF -->
+    <h4>Variante 3 — Impresión y exportación PDF</h4>
+    <div style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:12px;padding:32px;display:flex;align-items:center;justify-content:center;margin-bottom:8px">
+      <svg width="420" height="90" viewBox="0 0 420 90" xmlns="http://www.w3.org/2000/svg">
+        <rect width="420" height="90" rx="10" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+        <g transform="translate(36,45)">
+          <polygon points="0,-26 26,0 0,26 -26,0" fill="none" stroke="#0ea5e9" stroke-width="1.2" opacity="0.5"/>
+          <rect x="-4" y="-18" width="8" height="36" rx="2" fill="#0284c7"/>
+          <rect x="-18" y="-4" width="36" height="8" rx="2" fill="#0284c7"/>
+          <circle cx="0" cy="0" r="5" fill="#f8fafc"/>
+          <circle cx="0" cy="0" r="3" fill="#0284c7"/>
+        </g>
+        <line x1="68" y1="18" x2="68" y2="72" stroke="#e2e8f0" stroke-width="1"/>
+        <text x="84" y="38" font-family="Syne, sans-serif" font-size="36" font-weight="800" fill="#0f172a" letter-spacing="-1.5">SADE</text>
+        <text x="85" y="57" font-family="DM Mono, monospace" font-size="7.8" fill="#0284c7" letter-spacing="1.1">SISTEMA AUTOMATIZADO DE DOTACIÓN DE ENFERMERÍA</text>
+      </svg>
+    </div>
+    <p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);text-align:center;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:24px">Uso: encabezado del PDF exportado, planilla imprimible</p>
+
+    <div class="card accent-blue">
+      <div class="card-title">Especificaciones técnicas del logo institucional del establecimiento</div>
+      <p>Adicionalmente, cada institución puede cargar su propio logo. Formatos aceptados: PNG (fondo transparente preferido) o SVG. Tamaño máximo de upload: 2MB. Dimensiones recomendadas: 400×200px (landscape). El sistema almacena la URL en el campo <code>logo_url</code> de la entidad Institución y la sirve desde el mismo servidor o un CDN. El logo aparece en: (1) topbar de la app junto al logo SADE, (2) encabezado del PDF exportado. Si no se carga logo institucional, el topbar muestra el nombre del establecimiento en tipografía Syne.</p>
+    </div>
+  </section>
+
+  <!-- 11. EXPORTACIÓN PDF -->
+  <section id="exportacion">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <h2>Exportación a PDF — Planilla Imprimible</h2>
+    </div>
+
+    <p>El PDF exportado debe replicar fielmente el formato de la planilla de papel institucional (el documento de referencia provisto), incluyendo el logo de la institución en el encabezado. Se generará cliente-side usando <strong>jsPDF + html2canvas</strong> o directamente con la API de jsPDF para mayor control tipográfico.</p>
+
+    <h3>Estructura del PDF exportado</h3>
+    <ul class="req-list">
+      <li class="req-item">
+        <span class="req-id blue">PDF-01</span>
+        <div class="req-text"><strong>Encabezado:</strong> Logo de la institución (izquierda), nombre del establecimiento (derecha). Debajo: Área/Sector/Servicio — Mes — Año, en una línea horizontal con puntillado, replicando el formato original.</div>
+      </li>
+      <li class="req-item">
+        <span class="req-id blue">PDF-02</span>
+        <div class="req-text"><strong>Grilla:</strong> Tabla con columna "Personal" + columnas de días (1 a 31, adaptando al mes real). Celdas con letra M/T/N/F. Orientación apaisada (landscape) A4. Las celdas con alerta se imprimen con fondo sombreado gris claro (no a color, para compatibilidad con impresoras B&N).</div>
+      </li>
+      <li class="req-item">
+        <span class="req-id blue">PDF-03</span>
+        <div class="req-text"><strong>Pie de página:</strong> Contador de francos de cada enfermero en la última columna. Leyenda: M = Matutino, T = Vespertino, N = Nocturno, F = Franco. Firma del jefe de servicio y fecha de emisión.</div>
+      </li>
+      <li class="req-item">
+        <span class="req-id blue">PDF-04</span>
+        <div class="req-text"><strong>Ajuste de filas:</strong> Si hay más de 15 enfermeros, la grilla se divide en 2 páginas manteniendo el encabezado en ambas.</div>
+      </li>
+    </ul>
+
+    <div class="alert alert-green">
+      <span class="alert-icon">✓</span>
+      <span><strong>Adopción crítica:</strong> La planilla en papel sigue siendo necesaria en la mayoría de instituciones para firma y archivo físico. El botón "Exportar PDF" es una funcionalidad prioritaria de MVP, no una mejora futura.</span>
+    </div>
+  </section>
+
+  <!-- 12. FASES -->
+  <section id="fases">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <h2>Plan de Fases de Desarrollo</h2>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div class="tl-right">
+          <div class="tl-phase">Fase 1 — Semanas 1-3</div>
+          <div class="tl-title">Infraestructura y Datos</div>
+          <p class="tl-desc">Setup del proyecto (Vite + React + TS), configuración de PostgreSQL con Prisma, modelos de datos, endpoints básicos de autenticación y CRUD de personal. Deploy inicial en entorno de staging.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div class="tl-right">
+          <div class="tl-phase">Fase 2 — Semanas 4-6</div>
+          <div class="tl-title">Motor de Cálculo + Pantallas 1 y 2</div>
+          <p class="tl-desc">Implementar <code>dotacion.calc.ts</code> con las 5 fórmulas. Pantalla 1 con selector de servicio e índice automático. Pantalla 2 con dashboard de métricas. Tests unitarios del algoritmo.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div class="tl-right">
+          <div class="tl-phase">Fase 3 — Semanas 7-10</div>
+          <div class="tl-title">Grilla Interactiva (Pantalla 3) — Core</div>
+          <p class="tl-desc">Componente <code>ShiftGrid</code> con celdas editables, dropdown de turno, teclas rápidas, columnas de feriado/fin de semana diferenciadas y contador dinámico de francos por fila. Sin alertas aún.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div class="tl-right">
+          <div class="tl-phase">Fase 4 — Semanas 11-13</div>
+          <div class="tl-title">Sistema de Alertas y Validaciones REQ</div>
+          <p class="tl-desc">Implementar <code>useShiftValidation.ts</code> con REQ-001 a REQ-007. Sistema semáforo (color de celdas). Modal de confirmación para REQ-006. Bloqueos para REQ-004 y REQ-005. Modo override de supervisor.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div class="tl-right">
+          <div class="tl-phase">Fase 5 — Semanas 14-15</div>
+          <div class="tl-title">Exportación PDF + Logo</div>
+          <p class="tl-desc">Upload y gestión del logo institucional. Generación del PDF imprimible con jsPDF replicando el formato de la planilla de papel. Ajuste a orientación landscape A4.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot"></div></div>
+        <div class="tl-right">
+          <div class="tl-phase">Fase 6 — Semanas 16-18</div>
+          <div class="tl-title">Testing, QA y Puesta en Producción</div>
+          <p class="tl-desc">Pruebas con usuarios reales (jefes de enfermería), corrección de bugs, optimización de performance de la grilla (virtualización de filas si N > 30 enfermeros), deploy en producción con dominio propio.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13. RIESGOS -->
+  <section id="riesgos">
+    <div class="section-header">
+      <span class="section-num">13</span>
+      <h2>Riesgos y Consideraciones</h2>
+    </div>
+
+    <div class="card accent-red">
+      <div class="card-title">⚠ Riesgo Alto — Performance de la Grilla</div>
+      <p>Una grilla de 30 enfermeros × 31 días = 930 celdas con estado reactivo puede generar re-renders costosos. <strong>Mitigación:</strong> usar <code>React.memo</code> en <code>ShiftCell</code>, <code>useMemo</code> en los cálculos de validación, y evaluar <code>@tanstack/virtual</code> para virtualización de filas si el número de personal supera los 40.</p>
+    </div>
+
+    <div class="card accent-orange">
+      <div class="card-title">⚠ Riesgo Medio — Ambigüedad en REQ-003 (fin de mes)</div>
+      <p>Si un feriado cae el último día del mes, el franco compensatorio debe trasladarse al mes siguiente. La entidad Personal debe tener el campo <code>compensatorio_pendiente (Int)</code> que se suma automáticamente a la base de francos del mes siguiente al abrir esa planilla.</p>
+    </div>
+
+    <div class="card accent-orange">
+      <div class="card-title">⚠ Riesgo Medio — Enfermero en múltiples servicios</div>
+      <p>El modelo actual asume 1 servicio por enfermero. Si la institución tiene personal compartido entre servicios, se necesitará una relación N:M entre Personal y Servicio (tabla <code>personal_servicios</code>). Evaluar con el cliente en Fase 1.</p>
+    </div>
+
+    <div class="card accent-purple">
+      <div class="card-title">📌 Consideración — Roles de Usuario</div>
+      <p>Se recomienda implementar desde la Fase 1 al menos dos roles: <strong>Administrador</strong> (acceso completo, puede hacer override) y <strong>Visualizador</strong> (solo lectura, no puede modificar celdas). Un tercer rol <strong>Jefe de Servicio</strong> con acceso limitado a su propio servicio puede agregarse en una versión posterior.</p>
+    </div>
+
+    <div class="card accent-green">
+      <div class="card-title">✓ Fuera del Alcance del MVP</div>
+      <p>Las siguientes funcionalidades del documento de requerimientos se posponen a una versión 2.0: Módulo de BI Donabedian (indicadores de resultado clínico), integración con sistema HIS/HER externo, categorización de pacientes por UPE (Módulo de Carga Dinámica), Sistemas de Organización del Trabajo (por funciones, usuario o equipo).</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('section, .cover');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navItems.forEach(item => item.classList.remove('active'));
+        const id = entry.target.id;
+        const active = document.querySelector(`.nav-item[href="#${id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3, rootMargin: '-40px 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

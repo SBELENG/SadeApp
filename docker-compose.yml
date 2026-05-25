@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: sade-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: sade_user
+      POSTGRES_PASSWORD: sade_password
+      POSTGRES_DB: sade_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

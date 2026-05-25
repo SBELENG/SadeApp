@@ -1,0 +1,87 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@500&display=swap');
+.logo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  padding: 2rem 0 1.5rem;
+}
+.logo-row {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.variant-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  margin-top: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+</style>
+
+<div class="logo-wrap">
+  <div class="logo-row">
+
+    <!-- VARIANT 1: Dark — texto completo -->
+    <div>
+      <svg width="380" height="100" viewBox="0 0 380 100" role="img">
+        <title>SADE logo — variante oscura</title>
+        <rect width="380" height="100" rx="12" fill="#0a0e1a"/>
+        <g transform="translate(36,50)">
+          <polygon points="0,-28 28,0 0,28 -28,0" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.5"/>
+          <rect x="-4" y="-20" width="8" height="40" rx="2" fill="#38bdf8"/>
+          <rect x="-20" y="-4" width="40" height="8" rx="2" fill="#38bdf8"/>
+          <circle cx="0" cy="0" r="5" fill="#0a0e1a"/>
+          <circle cx="0" cy="0" r="3" fill="#38bdf8"/>
+        </g>
+        <text x="80" y="43" font-family="Syne, sans-serif" font-size="42" font-weight="800" fill="#f1f5f9" letter-spacing="-2">SADE</text>
+        <text x="81" y="63" font-family="DM Mono, monospace" font-size="8" fill="#38bdf8" letter-spacing="1.2">SISTEMA AUTOMATIZADO DE DOTACIÓN DE ENFERMERÍA</text>
+      </svg>
+      <div class="variant-label">Principal — fondo oscuro</div>
+    </div>
+
+    <!-- VARIANT 2: App icon -->
+    <div>
+      <svg width="90" height="90" viewBox="0 0 90 90" role="img">
+        <title>SADE logo — ícono solo</title>
+        <rect width="90" height="90" rx="18" fill="#0a0e1a"/>
+        <g transform="translate(45,45)">
+          <polygon points="0,-30 30,0 0,30 -30,0" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.4"/>
+          <rect x="-5" y="-22" width="10" height="44" rx="2.5" fill="#38bdf8"/>
+          <rect x="-22" y="-5" width="44" height="10" rx="2.5" fill="#38bdf8"/>
+          <circle cx="0" cy="0" r="6" fill="#0a0e1a"/>
+          <circle cx="0" cy="0" r="3.5" fill="#38bdf8"/>
+        </g>
+      </svg>
+      <div class="variant-label">App icon</div>
+    </div>
+
+  </div>
+
+  <!-- VARIANT 3: Fondo claro — texto completo -->
+  <div>
+    <svg width="420" height="90" viewBox="0 0 420 90" role="img">
+      <title>SADE logo — variante clara para impresión</title>
+      <rect width="420" height="90" rx="10" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+      <g transform="translate(36,45)">
+        <polygon points="0,-26 26,0 0,26 -26,0" fill="none" stroke="#0ea5e9" stroke-width="1.2" opacity="0.5"/>
+        <rect x="-4" y="-18" width="8" height="36" rx="2" fill="#0284c7"/>
+        <rect x="-18" y="-4" width="36" height="8" rx="2" fill="#0284c7"/>
+        <circle cx="0" cy="0" r="5" fill="#f8fafc"/>
+        <circle cx="0" cy="0" r="3" fill="#0284c7"/>
+      </g>
+      <line x1="68" y1="18" x2="68" y2="72" stroke="#e2e8f0" stroke-width="1"/>
+      <text x="84" y="38" font-family="Syne, sans-serif" font-size="36" font-weight="800" fill="#0f172a" letter-spacing="-1.5">SADE</text>
+      <text x="85" y="57" font-family="DM Mono, monospace" font-size="7.8" fill="#0284c7" letter-spacing="1.1">SISTEMA AUTOMATIZADO DE DOTACIÓN DE ENFERMERÍA</text>
+    </svg>
+    <div class="variant-label">Para PDF e impresión — fondo claro</div>
+  </div>
+
+</div>
