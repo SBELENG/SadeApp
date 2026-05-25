@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useConfigStore } from '../store/configStore';
-import { ESPECIALIDADES_INDICES, EspecialidadIndex } from '../utils/constants/indices';
+import { ESPECIALIDADES_INDICES } from '../utils/constants/indices';
+import type { EspecialidadIndex } from '../utils/constants/indices';
 
 export const ConfigPage: React.FC = () => {
   const {
@@ -22,7 +23,6 @@ export const ConfigPage: React.FC = () => {
     setYearAndMonth,
     toggleFeriado,
     setUnidades,
-    useConfigStore: store,
     ejecutarCalculo
   } = useConfigStore();
 
