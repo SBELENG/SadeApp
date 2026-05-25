@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useConfigStore } from '../store/configStore';
-import { ESPECIALIDADES_INDICES } from '../utils/constants/indices';
+import { ESPECIALIDADES_INDICES, EspecialidadIndex } from '../utils/constants/indices';
 
 export const ConfigPage: React.FC = () => {
   const {
@@ -13,12 +13,16 @@ export const ConfigPage: React.FC = () => {
     feriados,
     isCritical,
     ratio,
+    unidades,
+    ratioElegido,
     setServiceKey,
     setBeds,
     setIndexI,
     setNivel,
     setYearAndMonth,
     toggleFeriado,
+    setUnidades,
+    useConfigStore: store,
     ejecutarCalculo
   } = useConfigStore();
 
@@ -47,11 +51,35 @@ export const ConfigPage: React.FC = () => {
 
   // Obtener rango del slider
   const sliderBounds = useMemo(() => {
-    if (currentSpecialty) {
+    if (currentSpecialty && currentSpecialty.minI !== undefined && currentSpecialty.maxI !== undefined) {
       return { min: currentSpecialty.minI, max: currentSpecialty.maxI };
     }
     return { min: 1.0, max: 15.0 };
   }, [currentSpecialty]);
+
+  // Filtrado reactivo de especialidades agrupadas por categoría
+  const groupedSpecialties = useMemo(() => {
+    const maxLevel = nivel === 'segundo' ? 2 : 3;
+    const groups: Record<string, [string, EspecialidadIndex][]> = {
+      'Clínicas': [],
+      'Quirúrgicas': [],
+      'Pediátricas': [],
+      'Áreas quirúrgicas por ratio': [],
+      'Áreas críticas por ratio': [],
+      'Consulta externa por ratio': []
+    };
+
+    Object.entries(ESPECIALIDADES_INDICES).forEach(([key, item]) => {
+      if (item.nivelMinimo <= maxLevel) {
+        groups[item.categoria].push([key, item]);
+      }
+    });
+
+    // Filtrar grupos vacíos
+    return Object.fromEntries(
+      Object.entries(groups).filter(([_, items]) => items.length > 0)
+    );
+  }, [nivel]);
 
   const handleServiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setServiceKey(e.target.value);
@@ -91,44 +119,53 @@ export const ConfigPage: React.FC = () => {
               className="input-tech select-tech" 
               value={serviceKey} 
               onChange={handleServiceChange}
+              style={{
+                borderColor: !serviceKey ? 'var(--accent5)' : 'var(--border)'
+              }}
             >
-              {Object.entries(ESPECIALIDADES_INDICES).map(([key, item]) => (
-                <option key={key} value={key}>
-                  {item.especialidad} ({item.categoria})
-                </option>
+              <option value="">-- Seleccione una Especialidad --</option>
+              {Object.entries(groupedSpecialties).map(([groupName, items]) => (
+                <optgroup key={groupName} label={groupName}>
+                  {items.map(([key, item]) => (
+                    <option key={key} value={key}>
+                      {item.especialidad}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
-            {currentSpecialty && (
+
+            {/* Alerta de inconsistencia si cambia la complejidad */}
+            {!serviceKey && (
+              <span style={{ fontSize: '12.5px', color: 'var(--accent5)', marginTop: '8px', display: 'block', fontWeight: 'bold' }}>
+                ⚠️ La especialidad seleccionada no está disponible para este nivel de complejidad.
+              </span>
+            )}
+
+            {currentSpecialty && currentSpecialty.tipoCalculo === 'indice' && currentSpecialty.perfilRequerido && (
               <span style={{ fontSize: '12px', color: 'var(--text3)', marginTop: '6px', display: 'block' }}>
                 Perfil requerido: <strong style={{ color: 'var(--accent)' }}>{currentSpecialty.perfilRequerido}</strong>
+              </span>
+            )}
+            {currentSpecialty && currentSpecialty.tipoCalculo === 'ratio' && (
+              <span style={{ fontSize: '12px', color: 'var(--text3)', marginTop: '6px', display: 'block' }}>
+                Tipo de Cálculo: <strong style={{ color: 'var(--accent4)' }}>Estándar por Ratio Fijo (Anexo 1 UNRC)</strong>
               </span>
             )}
           </div>
 
           {/* Renglón Camas y Complejidad */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            {/* Camas */}
-            <div>
-              <label className="label-tech">Camas Ocupadas / Disponibles</label>
-              <input 
-                type="number" 
-                className="input-tech" 
-                min="1" 
-                value={beds} 
-                onChange={(e) => setBeds(Math.max(1, parseInt(e.target.value) || 1))}
-              />
-            </div>
             
-            {/* Complejidad */}
+            {/* Nivel de Complejidad */}
             <div>
               <label className="label-tech">Nivel de Complejidad</label>
               <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: isCritical ? 'not-allowed' : 'pointer', color: isCritical ? 'var(--text3)' : 'var(--text)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: 'var(--text)' }}>
                   <input 
                     type="radio" 
                     name="nivel"
                     checked={nivel === 'segundo'}
-                    disabled={isCritical}
                     onChange={() => setNivel('segundo')}
                     style={{ accentColor: 'var(--accent)' }}
                   />
@@ -146,60 +183,126 @@ export const ConfigPage: React.FC = () => {
                 </label>
               </div>
             </div>
-          </div>
 
-          {/* Índice I o Ratio de UCI */}
-          <div style={{ background: 'var(--surface2)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-            {isCritical ? (
+            {/* Camas / Unidades */}
+            {currentSpecialty && currentSpecialty.tipoCalculo === 'ratio' ? (
               <div>
-                <label className="label-tech" style={{ color: 'var(--accent4)' }}>Ratio Cama/Enfermero (UCI)</label>
-                <p style={{ fontSize: '13px', color: 'var(--text2)', marginBottom: '14px' }}>
-                  Las áreas críticas se calculan directamente en base al ratio de pacientes por enfermero por turno (Ley 24.004).
-                </p>
-                <div style={{ display: 'flex', gap: '16px' }}>
-                  <button 
-                    type="button"
-                    className={`btn-secondary-tech ${ratio === '1:2' ? 'active' : ''}`}
-                    style={{ flex: 1, borderColor: ratio === '1:2' ? 'var(--accent)' : 'var(--border)', color: ratio === '1:2' ? 'var(--accent)' : 'var(--text)' }}
-                    onClick={() => useConfigStore.setState({ ratio: '1:2' })}
-                  >
-                    Ratio 1:2 (Medio)
-                  </button>
-                  <button 
-                    type="button"
-                    className={`btn-secondary-tech ${ratio === '1:1' ? 'active' : ''}`}
-                    style={{ flex: 1, borderColor: ratio === '1:1' ? 'var(--accent)' : 'var(--border)', color: ratio === '1:1' ? 'var(--accent)' : 'var(--text)' }}
-                    onClick={() => useConfigStore.setState({ ratio: '1:1' })}
-                  >
-                    Ratio 1:1 (Severo)
-                  </button>
-                </div>
+                <label className="label-tech">Cantidad de Unidades</label>
+                <input 
+                  type="number" 
+                  className="input-tech" 
+                  min="1" 
+                  value={unidades} 
+                  onChange={(e) => setUnidades(Math.max(1, parseInt(e.target.value) || 1))}
+                  placeholder="salas, máquinas, consultorios..."
+                />
               </div>
             ) : (
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <label className="label-tech">Horas de Cuidado Directo (I)</label>
-                  <span className="mono-data" style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '14px' }}>
-                    {indexI.toFixed(1)} hs / paciente
-                  </span>
-                </div>
+                <label className="label-tech">Camas Ocupadas / Disponibles</label>
                 <input 
-                  type="range" 
-                  className="slider-tech"
-                  min={sliderBounds.min}
-                  max={sliderBounds.max}
-                  step="0.1"
-                  value={indexI}
-                  onChange={(e) => setIndexI(parseFloat(e.target.value))}
+                  type="number" 
+                  className="input-tech" 
+                  min="1" 
+                  value={beds} 
+                  onChange={(e) => setBeds(Math.max(1, parseInt(e.target.value) || 1))}
                 />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text3)', marginTop: '8px' }}>
-                  <span>Min: {sliderBounds.min.toFixed(1)} hs</span>
-                  <span>Rango Especialidad</span>
-                  <span>Max: {sliderBounds.max.toFixed(1)} hs</span>
-                </div>
               </div>
             )}
           </div>
+
+          {/* Índice I o Ratios de Personal */}
+          {currentSpecialty && currentSpecialty.tipoCalculo === 'ratio' ? (
+            <div style={{ background: 'var(--surface2)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+              <div>
+                <label className="label-tech" style={{ color: 'var(--accent4)' }}>Estándar de Ratios de Personal</label>
+                <p style={{ fontSize: '13px', color: 'var(--text2)', marginBottom: '14px' }}>
+                  Este servicio no utiliza índice horario sino ratios de personal. Seleccione la cobertura del ratio a aplicar:
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '16px', marginBottom: '16px' }}>
+                  <div>
+                    <span style={{ fontSize: '11px', color: 'var(--text3)', display: 'block', marginBottom: '4px' }}>RATIO MÍNIMO (De):</span>
+                    <input type="text" className="input-tech" value={currentSpecialty.ratioMin || ''} readOnly style={{ opacity: 0.8 }} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '11px', color: 'var(--text3)', display: 'block', marginBottom: '4px' }}>RATIO MÁXIMO (A):</span>
+                    <input type="text" className="input-tech" value={currentSpecialty.ratioMax || ''} readOnly style={{ opacity: 0.8 }} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <button 
+                    type="button"
+                    className={`btn-secondary-tech ${ratioElegido === 'min' ? 'active' : ''}`}
+                    style={{ flex: 1, borderColor: ratioElegido === 'min' ? 'var(--accent)' : 'var(--border)', color: ratioElegido === 'min' ? 'var(--accent)' : 'var(--text)' }}
+                    onClick={() => useConfigStore.setState({ ratioElegido: 'min' })}
+                  >
+                    Estándar Mínimo (De)
+                  </button>
+                  <button 
+                    type="button"
+                    className={`btn-secondary-tech ${ratioElegido === 'max' ? 'active' : ''}`}
+                    style={{ flex: 1, borderColor: ratioElegido === 'max' ? 'var(--accent)' : 'var(--border)', color: ratioElegido === 'max' ? 'var(--accent)' : 'var(--text)' }}
+                    onClick={() => useConfigStore.setState({ ratioElegido: 'max' })}
+                  >
+                    Estándar Máximo (A)
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div style={{ background: 'var(--surface2)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+              {isCritical ? (
+                <div>
+                  <label className="label-tech" style={{ color: 'var(--accent4)' }}>Ratio Cama/Enfermero (UCI)</label>
+                  <p style={{ fontSize: '13px', color: 'var(--text2)', marginBottom: '14px' }}>
+                    Las áreas críticas se calculan directamente en base al ratio de pacientes por enfermero por turno (Ley 24.004).
+                  </p>
+                  <div style={{ display: 'flex', gap: '16px' }}>
+                    <button 
+                      type="button"
+                      className={`btn-secondary-tech ${ratio === '1:2' ? 'active' : ''}`}
+                      style={{ flex: 1, borderColor: ratio === '1:2' ? 'var(--accent)' : 'var(--border)', color: ratio === '1:2' ? 'var(--accent)' : 'var(--text)' }}
+                      onClick={() => useConfigStore.setState({ ratio: '1:2' })}
+                    >
+                      Ratio 1:2 (Medio)
+                    </button>
+                    <button 
+                      type="button"
+                      className={`btn-secondary-tech ${ratio === '1:1' ? 'active' : ''}`}
+                      style={{ flex: 1, borderColor: ratio === '1:1' ? 'var(--accent)' : 'var(--border)', color: ratio === '1:1' ? 'var(--accent)' : 'var(--text)' }}
+                      onClick={() => useConfigStore.setState({ ratio: '1:1' })}
+                    >
+                      Ratio 1:1 (Severo)
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <label className="label-tech">Horas de Cuidado Directo (I)</label>
+                    <span className="mono-data" style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '14px' }}>
+                      {indexI.toFixed(1)} hs / paciente
+                    </span>
+                  </div>
+                  <input 
+                    type="range" 
+                    className="slider-tech"
+                    min={sliderBounds.min}
+                    max={sliderBounds.max}
+                    step="0.1"
+                    value={indexI}
+                    disabled={!serviceKey}
+                    onChange={(e) => setIndexI(parseFloat(e.target.value))}
+                  />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text3)', marginTop: '8px' }}>
+                    <span>Min: {sliderBounds.min.toFixed(1)} hs</span>
+                    <span>Rango Especialidad</span>
+                    <span>Max: {sliderBounds.max.toFixed(1)} hs</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Renglón Mes y Año */}
           <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px' }}>
@@ -313,7 +416,8 @@ export const ConfigPage: React.FC = () => {
           type="button" 
           className="btn-premium" 
           onClick={ejecutarCalculo}
-          style={{ width: '280px', height: '52px' }}
+          disabled={!serviceKey}
+          style={{ width: '280px', height: '52px', opacity: !serviceKey ? 0.6 : 1, cursor: !serviceKey ? 'not-allowed' : 'pointer' }}
         >
           <span>Calcular Dotación</span>
           <span style={{ fontSize: '16px' }}>→</span>

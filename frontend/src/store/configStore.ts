@@ -14,6 +14,8 @@ export interface ConfigState {
   feriados: number[]; // Días feriados, ej: [25]
   isCritical: boolean;
   ratio: '1:2' | '1:1';
+  unidades: number; // Cantidad de unidades (salas, etc.) para cálculo por ratio
+  ratioElegido: 'min' | 'max'; // Opción elegida del ratio
   dotacion: DotacionOutput | null;
   logoBase64: string | null;
   
@@ -27,6 +29,8 @@ export interface ConfigState {
   toggleFeriado: (day: number) => void;
   setFeriados: (feriados: number[]) => void;
   setRatio: (ratio: '1:2' | '1:1') => void;
+  setUnidades: (unidades: number) => void;
+  setRatioElegido: (ratio: 'min' | 'max') => void;
   setLogoBase64: (logo: string | null) => void;
   ejecutarCalculo: () => void;
 }
@@ -42,26 +46,26 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
   feriados: [20, 25], // Feriados nacionales por defecto en Junio
   isCritical: false,
   ratio: '1:2',
+  unidades: 1,
+  ratioElegido: 'min',
   dotacion: null,
   logoBase64: typeof window !== 'undefined' ? localStorage.getItem('sade_institucion_logo') : null,
 
   setCurrentPage: (page) => set({ currentPage: page }),
 
   setServiceKey: (key) => {
-    const isCritical = key === 'uci_adultos';
+    const spec = ESPECIALIDADES_INDICES[key];
+    if (!spec) {
+      set({ serviceKey: '', dotacion: null });
+      return;
+    }
+
+    const isCritical = spec.categoria === 'Áreas críticas por ratio';
     let indexI = 4.2;
-    let nivel: 'segundo' | 'tercero' = 'segundo';
+    let nivel: 'segundo' | 'tercero' = spec.nivelMinimo === 3 ? 'tercero' : 'segundo';
     
-    if (isCritical) {
-      nivel = 'tercero'; // Terapia es típicamente 3er nivel
-    } else {
-      const spec = ESPECIALIDADES_INDICES[key];
-      if (spec) {
-        indexI = parseFloat(((spec.minI + spec.maxI) / 2).toFixed(1));
-        if (spec.perfilRequerido === 'Enfermero Especialista') {
-          nivel = 'tercero';
-        }
-      }
+    if (spec.tipoCalculo === 'indice' && spec.minI !== undefined && spec.maxI !== undefined) {
+      indexI = parseFloat(((spec.minI + spec.maxI) / 2).toFixed(1));
     }
 
     set({ 
@@ -69,16 +73,32 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
       isCritical, 
       indexI, 
       nivel,
+      unidades: 1,
+      ratioElegido: 'min',
       dotacion: null // resetear cálculo al cambiar especialidad
     });
   },
 
   setBeds: (beds) => set({ beds, dotacion: null }),
   setIndexI: (indexI) => set({ indexI, dotacion: null }),
-  setNivel: (nivel) => set({ nivel, dotacion: null }),
+  
+  setNivel: (nivel) => {
+    const { serviceKey } = get();
+    const spec = ESPECIALIDADES_INDICES[serviceKey];
+    
+    // Si cambiamos a un nivel de complejidad inferior y el servicio actual no está disponible, se limpia.
+    if (spec && nivel === 'segundo' && spec.nivelMinimo === 3) {
+      set({ 
+        nivel, 
+        serviceKey: '', 
+        dotacion: null 
+      });
+    } else {
+      set({ nivel, dotacion: null });
+    }
+  },
   
   setYearAndMonth: (year, month) => {
-    // Cuando cambia mes/año, podríamos autocompletar feriados nacionales por defecto si se desea
     set({ year, month, dotacion: null });
   },
 
@@ -93,6 +113,8 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
 
   setFeriados: (feriados) => set({ feriados, dotacion: null }),
   setRatio: (ratio) => set({ ratio, dotacion: null }),
+  setUnidades: (unidades) => set({ unidades, dotacion: null }),
+  setRatioElegido: (ratioElegido) => set({ ratioElegido, dotacion: null }),
 
   setLogoBase64: (logo) => {
     if (logo) {
@@ -104,14 +126,21 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
   },
 
   ejecutarCalculo: () => {
-    const { indexI, beds, nivel, isCritical, ratio } = get();
+    const { indexI, beds, nivel, isCritical, ratio, serviceKey, unidades, ratioElegido } = get();
+    const spec = ESPECIALIDADES_INDICES[serviceKey];
+
     const res = calcularDotacion({
-      I: isCritical ? undefined : indexI,
+      I: isCritical || (spec && spec.tipoCalculo === 'ratio') ? undefined : indexI,
       C: beds,
       J: 8,
       nivel,
       isCritical,
-      ratio: isCritical ? ratio : undefined
+      ratio: isCritical ? ratio : undefined,
+      tipoCalculo: spec ? spec.tipoCalculo : 'indice',
+      unidades: spec && spec.tipoCalculo === 'ratio' ? unidades : undefined,
+      ratioMin: spec ? spec.ratioMin : undefined,
+      ratioMax: spec ? spec.ratioMax : undefined,
+      ratioElegido: ratioElegido
     });
     set({ dotacion: res, currentPage: 'dashboard' });
   }
