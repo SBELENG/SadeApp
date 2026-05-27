@@ -156,24 +156,26 @@ export const useGridStore = create<GridState>((set, get) => ({
       const k = staffDeTurno.length;
       if (k === 0) return;
 
-      // Todos los enfermeros de este turno fijo comienzan trabajando en su turno
+      // Inicialización base: fines de semana y feriados son 'F', días de semana son turno_fijo
       staffDeTurno.forEach((enf) => {
         for (let day = 1; day <= totalDays; day++) {
-          turnos[enf.id][day] = turno as TurnoTipo;
+          const date = new Date(anio, mes - 1, day);
+          const dayOfWeek = date.getDay();
+          const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+          const isFeriado = feriados.includes(day);
+
+          if (isWeekend || isFeriado) {
+            turnos[enf.id][day] = 'F';
+          } else {
+            turnos[enf.id][day] = turno as TurnoTipo;
+          }
         }
       });
 
-      const baseFrancos = totalDays === 31 ? 9 : 8;
-      const targetFrancos = baseFrancos + feriados.length;
-      
-      const francosAsignados: Record<string, number> = {};
-      staffDeTurno.forEach((enf) => {
-        francosAsignados[enf.id] = 0;
-      });
-
-      // Primero: Asignar francos en Fines de Semana y Feriados de forma escalonada (rotativa)
-      // Aseguramos que exactamente un enfermero cubra la guardia en cada fin de semana/feriado.
-      let weekendHolidayCount = 0;
+      // Si k > 0, queremos que haya cobertura de al menos 1 enfermero en fines de semana y feriados.
+      // Para cada fin de semana/feriado, elegimos un enfermero de forma rotativa para trabajar.
+      // Ese enfermero recupera su franco en el día de semana más cercano disponible.
+      let weekendHolidayIndex = 0;
       for (let day = 1; day <= totalDays; day++) {
         const date = new Date(anio, mes - 1, day);
         const dayOfWeek = date.getDay();
@@ -181,40 +183,58 @@ export const useGridStore = create<GridState>((set, get) => ({
         const isFeriado = feriados.includes(day);
 
         if (isWeekend || isFeriado) {
-          // El enfermero asignado a trabajar es index = weekendHolidayCount % k
-          const enfQueTrabajaIdx = weekendHolidayCount % k;
+          // Elegimos quién trabaja (guardia)
+          const workNurseIdx = weekendHolidayIndex % k;
+          const workNurse = staffDeTurno[workNurseIdx];
           
-          staffDeTurno.forEach((enf, idx) => {
-            if (idx !== enfQueTrabajaIdx && francosAsignados[enf.id] < targetFrancos) {
-              turnos[enf.id][day] = 'F';
-              francosAsignados[enf.id]++;
-            }
-          });
-          weekendHolidayCount++;
-        }
-      }
+          // Cambiamos su franco 'F' por el turno de trabajo
+          turnos[workNurse.id][day] = turno as TurnoTipo;
 
-      // Segundo: Completar los francos restantes en días de semana
-      // Ordenamos en cada paso para dar franco a quien tenga menos acumulados
-      const maxFrancosSimultaneos = Math.max(1, k - 1);
-      for (let day = 1; day <= totalDays; day++) {
-        const date = new Date(anio, mes - 1, day);
-        const dayOfWeek = date.getDay();
-        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-        const isFeriado = feriados.includes(day);
+          // Compensación: le damos un franco en un día de semana de la misma semana o posterior
+          // Buscamos el primer día de semana disponible posterior que no sea feriado y donde esté trabajando
+          let compensado = false;
+          for (let d = day + 1; d <= totalDays; d++) {
+            const dDate = new Date(anio, mes - 1, d);
+            const dDayOfWeek = dDate.getDay();
+            const dIsWeekend = dDayOfWeek === 0 || dDayOfWeek === 6;
+            const dIsFeriado = feriados.includes(d);
 
-        if (!isWeekend && !isFeriado) {
-          const sortedStaff = [...staffDeTurno].sort((a, b) => francosAsignados[a.id] - francosAsignados[b.id]);
-          
-          let francosAsignadosHoy = 0;
-          for (let i = 0; i < sortedStaff.length; i++) {
-            const enf = sortedStaff[i];
-            if (francosAsignados[enf.id] < targetFrancos && francosAsignadosHoy < maxFrancosSimultaneos) {
-              turnos[enf.id][day] = 'F';
-              francosAsignados[enf.id]++;
-              francosAsignadosHoy++;
+            if (!dIsWeekend && !dIsFeriado && turnos[workNurse.id][d] === turno) {
+              // Asegurar que si k > 1, no dejemos ese día de semana con cobertura cero
+              const otrosTrabajandoHoy = staffDeTurno.filter(
+                (p) => p.id !== workNurse.id && turnos[p.id][d] === turno
+              ).length;
+
+              if (k === 1 || otrosTrabajandoHoy > 0) {
+                turnos[workNurse.id][d] = 'F';
+                compensado = true;
+                break;
+              }
             }
           }
+
+          // Si no se pudo compensar hacia adelante (ej. fin de mes), compensar hacia atrás
+          if (!compensado) {
+            for (let d = day - 1; d >= 1; d--) {
+              const dDate = new Date(anio, mes - 1, d);
+              const dDayOfWeek = dDate.getDay();
+              const dIsWeekend = dDayOfWeek === 0 || dDayOfWeek === 6;
+              const dIsFeriado = feriados.includes(d);
+
+              if (!dIsWeekend && !dIsFeriado && turnos[workNurse.id][d] === turno) {
+                const otrosTrabajandoHoy = staffDeTurno.filter(
+                  (p) => p.id !== workNurse.id && turnos[p.id][d] === turno
+                ).length;
+
+                if (k === 1 || otrosTrabajandoHoy > 0) {
+                  turnos[workNurse.id][d] = 'F';
+                  break;
+                }
+              }
+            }
+          }
+
+          weekendHolidayIndex++;
         }
       }
     });

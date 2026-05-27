@@ -20,7 +20,8 @@ export const GridPage: React.FC = () => {
     limpiarPlanilla,
     personal,
     agregarEnfermero,
-    eliminarEnfermero
+    eliminarEnfermero,
+    editarEnfermero
   } = useGridStore();
 
   const { exportToPdf } = usePdf();
@@ -307,24 +308,53 @@ export const GridPage: React.FC = () => {
                             M. {enfermero.matricula} · {formatLabel}
                           </span>
                         </div>
-                        <button
-                          onClick={() => {
-                            if (window.confirm(`¿Desea quitar a ${enfermero.nombre} ${enfermero.apellido} de la nómina?`)) {
-                              eliminarEnfermero(enfermero.id);
-                            }
-                          }}
-                          style={{
-                            background: 'transparent',
-                            border: '1px solid rgba(239, 68, 68, 0.4)',
-                            color: '#f87171',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            fontSize: '11px',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Quitar
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <select
+                            value={enfermero.turno_fijo || 'ROTATIVO'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              editarEnfermero({
+                                ...enfermero,
+                                turno_fijo: val === 'ROTATIVO' ? null : val as any
+                              });
+                              setTimeout(() => inicializarPlanilla(month, year, feriados), 50);
+                            }}
+                            style={{
+                              padding: '4px 6px',
+                              background: 'var(--surface2)',
+                              border: '1px solid var(--border)',
+                              borderRadius: '4px',
+                              color: 'var(--text)',
+                              fontSize: '11px',
+                              outline: 'none',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <option value="ROTATIVO">ROTATIVO / SIN FIJO</option>
+                            <option value="M">MAÑANA (M)</option>
+                            <option value="T">TARDE (T)</option>
+                            <option value="N">NOCHE (N)</option>
+                          </select>
+
+                          <button
+                            onClick={() => {
+                              if (window.confirm(`¿Desea quitar a ${enfermero.nombre} ${enfermero.apellido} de la nómina?`)) {
+                                eliminarEnfermero(enfermero.id);
+                              }
+                            }}
+                            style={{
+                              background: 'transparent',
+                              border: '1px solid rgba(239, 68, 68, 0.4)',
+                              color: '#f87171',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              fontSize: '11px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Quitar
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
