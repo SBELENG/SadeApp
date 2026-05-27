@@ -165,23 +165,23 @@ export const GridPage: React.FC = () => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
           <span style={{ fontSize: '12px', color: 'var(--text3)', textTransform: 'uppercase', fontWeight: 'bold' }}>
-            Leyenda de Celdas:
+            Referencias:
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px' }}>
             <span className="mono-data" style={{ background: 'rgba(56, 189, 248, 0.12)', border: '1px solid rgba(56, 189, 248, 0.3)', color: 'var(--accent)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>M</span>
-            Vespertino / Matutino
+            Mañana
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px' }}>
             <span className="mono-data" style={{ background: 'rgba(129, 140, 248, 0.12)', border: '1px solid rgba(129, 140, 248, 0.3)', color: 'var(--accent2)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>T</span>
-            Vespertino / Tarde
+            Tarde
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px' }}>
             <span className="mono-data" style={{ background: 'rgba(251, 146, 60, 0.12)', border: '1px solid rgba(251, 146, 60, 0.3)', color: 'var(--accent4)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>N</span>
-            Nocturno / Noche
+            Noche
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px' }}>
             <span className="mono-data" style={{ background: 'rgba(52, 211, 153, 0.12)', border: '1px solid rgba(52, 211, 153, 0.3)', color: 'var(--accent3)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>F</span>
-            Franco (Descanso Ordinario) 🟢
+            Franco
           </span>
         </div>
         

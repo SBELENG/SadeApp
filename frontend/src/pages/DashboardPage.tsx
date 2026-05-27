@@ -45,10 +45,10 @@ export const DashboardPage: React.FC = () => {
     { name: 'Francos (Qf)', value: dotacion.Qf, color: '#34d399' }
   ];
 
-  // Datos para el gráfico de composición profesional (Profesionales vs Auxiliares)
+  // Datos para el gráfico de composición profesional (Licenciados/Especialistas vs Enfermeros)
   const composicionData = [
-    { name: 'Profesionales (S)', value: dotacion.profesionales, color: '#0ea5e9' },
-    { name: 'Auxiliares (V)', value: dotacion.auxiliares, color: '#f87171' }
+    { name: 'Licenciados/Especialistas (S)', value: dotacion.profesionales, color: '#0ea5e9' },
+    { name: 'Enfermeros (V)', value: dotacion.auxiliares, color: '#f87171' }
   ];
 
   return (

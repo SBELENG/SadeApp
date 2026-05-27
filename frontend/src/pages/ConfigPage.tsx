@@ -97,7 +97,6 @@ export const ConfigPage: React.FC = () => {
     <div className="main-content" style={{ maxWidth: '1100px' }}>
       {/* Encabezado */}
       <div style={{ marginBottom: '40px', textAlign: 'left' }}>
-        <span className="badge-tech badge-blue" style={{ marginBottom: '12px' }}>Fase 2 — Motor de Cálculo</span>
         <h1 style={{ marginBottom: '8px' }}>Configuración del Mes</h1>
         <p style={{ color: 'var(--text2)', fontSize: '16px', maxWidth: '700px' }}>
           Parametrice las variables de internación y configure los feriados para calcular automáticamente la dotación de personal requerida.

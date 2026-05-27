@@ -18,6 +18,7 @@ export interface ConfigState {
   ratioElegido: 'min' | 'max'; // Opción elegida del ratio
   dotacion: DotacionOutput | null;
   logoBase64: string | null;
+  nombreInstitucion: string;
   
   // Actions
   setCurrentPage: (page: 'config' | 'dashboard' | 'grid') => void;
@@ -32,6 +33,7 @@ export interface ConfigState {
   setUnidades: (unidades: number) => void;
   setRatioElegido: (ratio: 'min' | 'max') => void;
   setLogoBase64: (logo: string | null) => void;
+  setNombreInstitucion: (nombre: string) => void;
   ejecutarCalculo: () => void;
 }
 
@@ -50,6 +52,7 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
   ratioElegido: 'min',
   dotacion: null,
   logoBase64: typeof window !== 'undefined' ? localStorage.getItem('sade_institucion_logo') : null,
+  nombreInstitucion: typeof window !== 'undefined' ? (localStorage.getItem('sade_nombre_institucion') || 'HOSPITAL REGIONAL DE ALTA COMPLEJIDAD') : 'HOSPITAL REGIONAL DE ALTA COMPLEJIDAD',
 
   setCurrentPage: (page) => set({ currentPage: page }),
 
@@ -123,6 +126,15 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
       localStorage.removeItem('sade_institucion_logo');
     }
     set({ logoBase64: logo });
+  },
+
+  setNombreInstitucion: (nombre) => {
+    if (nombre) {
+      localStorage.setItem('sade_nombre_institucion', nombre);
+    } else {
+      localStorage.removeItem('sade_nombre_institucion');
+    }
+    set({ nombreInstitucion: nombre });
   },
 
   ejecutarCalculo: () => {

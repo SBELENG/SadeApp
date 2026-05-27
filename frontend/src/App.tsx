@@ -6,7 +6,7 @@ import { GridPage } from './pages/GridPage';
 import { ESPECIALIDADES_INDICES } from './utils/constants/indices';
 
 const App: React.FC = () => {
-  const { currentPage, setCurrentPage, serviceKey, month, year, dotacion, logoBase64, setLogoBase64 } = useConfigStore();
+  const { currentPage, setCurrentPage, serviceKey, month, year, dotacion, logoBase64, setLogoBase64, nombreInstitucion, setNombreInstitucion } = useConfigStore();
 
   const currentSpecialty = ESPECIALIDADES_INDICES[serviceKey];
   
@@ -55,26 +55,25 @@ const App: React.FC = () => {
           gap: '16px'
         }}>
           
-          {/* LOGO SADE (Variante 1 - Adaptado Compacto) */}
+          {/* LOGO SADE (Variante Vectorial Premium - Comercial) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer' }} onClick={() => setCurrentPage('config')}>
-            <svg width="180" height="42" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg">
-              <g transform="translate(20,25)">
-                <polygon points="0,-18 18,0 0,18 -18,0" fill="none" stroke="#38bdf8" strokeWidth="1.2" opacity="0.6"/>
-                <rect x="-2.5" y="-12" width="5" height="24" rx="1" fill="#38bdf8"/>
-                <rect x="-12" y="-2.5" width="24" height="5" rx="1" fill="#38bdf8"/>
-                <circle cx="0" cy="0" r="3" fill="#0a0e1a"/>
-                <circle cx="0" cy="0" r="1.8" fill="#38bdf8"/>
+            <svg width="340" height="50" viewBox="0 0 340 50" xmlns="http://www.w3.org/2000/svg" style={{ imageRendering: 'crisp-edges' }}>
+              <g transform="translate(22,25)">
+                <polygon points="0,-18 18,0 0,18 -18,0" fill="none" stroke="#38bdf8" strokeWidth="1.6" opacity="0.95"/>
+                <rect x="-3.5" y="-12" width="7" height="24" rx="1.5" fill="#38bdf8"/>
+                <rect x="-12" y="-3.5" width="24" height="7" rx="1.5" fill="#38bdf8"/>
+                <circle cx="0" cy="0" r="4.2" fill="#0a0e1a"/>
+                <circle cx="0" cy="0" r="2.2" fill="#38bdf8"/>
               </g>
-              <text x="48" y="27" fontFamily="Syne, sans-serif" fontSize="24" fontWeight="800" fill="#f1f5f9" letterSpacing="-1">SADE</text>
-              <text x="49" y="38" fontFamily="DM Mono, monospace" fontSize="5.2" fill="#38bdf8" letterSpacing="0.8">SISTEMA DE DOTACIÓN</text>
+              <text x="52" y="24" fontFamily="Syne, sans-serif" fontSize="25" fontWeight="800" fill="#f1f5f9" letterSpacing="-0.5">SADE</text>
+              <text x="53" y="38" fontFamily="DM Mono, monospace" fontSize="6.2" fontWeight="600" fill="#38bdf8" letterSpacing="0.2">SISTEMA AUTOMATIZADO DE DOTACIÓN DE ENFERMERÍA</text>
             </svg>
 
             {/* Separador */}
             <div style={{ height: '24px', width: '1px', background: 'var(--border)' }}></div>
             
-            {/* Logo de la Institución / Nombre interactivo */}
+            {/* Logo de la Institución / Nombre interactivo configurable */}
             <div 
-              onClick={handleLogoAreaClick}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -83,7 +82,6 @@ const App: React.FC = () => {
                 borderRadius: '8px',
                 transition: 'all 0.2s ease',
                 position: 'relative',
-                cursor: 'pointer',
                 border: '1px solid transparent'
               }}
               onMouseEnter={(e) => {
@@ -94,7 +92,6 @@ const App: React.FC = () => {
                 e.currentTarget.style.borderColor = 'transparent';
                 e.currentTarget.style.background = 'transparent';
               }}
-              title="Click para subir o cambiar el logo de la institución"
             >
               <input 
                 type="file" 
@@ -104,73 +101,103 @@ const App: React.FC = () => {
                 style={{ display: 'none' }} 
               />
               
-              {logoBase64 ? (
-                <div style={{ position: 'relative', width: '34px', height: '34px', flexShrink: 0 }}>
-                  <img 
-                    src={logoBase64} 
-                    alt="Logo Hospital" 
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      borderRadius: '6px',
-                      border: '1.5px solid var(--accent)'
-                    }}
-                  />
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (window.confirm('¿Desea quitar el logo institucional?')) {
-                        setLogoBase64(null);
-                      }
-                    }}
-                    style={{
-                      position: 'absolute',
-                      top: '-6px',
-                      right: '-6px',
-                      background: 'var(--accent5)',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '50%',
-                      width: '14px',
-                      height: '14px',
-                      fontSize: '9px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                      lineHeight: '1'
-                    }}
-                    title="Eliminar logo"
-                  >
-                    ×
-                  </button>
-                </div>
-              ) : (
-                <div style={{
-                  width: '34px',
-                  height: '34px',
-                  borderRadius: '6px',
-                  background: 'rgba(56, 189, 248, 0.08)',
-                  border: '1.5px dashed var(--accent)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--accent)',
-                  fontSize: '15px',
-                  fontWeight: 'bold',
-                  flexShrink: 0
-                }}>
-                  🏥
-                </div>
-              )}
+              <div 
+                onClick={handleLogoAreaClick}
+                style={{ cursor: 'pointer' }}
+                title="Click para subir o cambiar el logo de la institución (max 2MB)"
+              >
+                {logoBase64 ? (
+                  <div style={{ position: 'relative', width: '36px', height: '36px', flexShrink: 0 }}>
+                    <img 
+                      src={logoBase64} 
+                      alt="Logo Hospital" 
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '6px',
+                        border: '1.5px solid var(--accent)'
+                      }}
+                    />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm('¿Desea quitar el logo institucional?')) {
+                          setLogoBase64(null);
+                        }
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: '-6px',
+                        right: '-6px',
+                        background: 'var(--accent5)',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '14px',
+                        height: '14px',
+                        fontSize: '9px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                        lineHeight: '1'
+                      }}
+                      title="Eliminar logo"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '6px',
+                    background: 'rgba(56, 189, 248, 0.08)',
+                    border: '1.5px dashed var(--accent)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--accent)',
+                    fontSize: '15px',
+                    fontWeight: 'bold',
+                    flexShrink: 0
+                  }}>
+                    🏥
+                  </div>
+                )}
+              </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-                <span style={{ fontSize: '11px', color: 'var(--text)', fontWeight: '600', letterSpacing: '0.5px', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  HOSPITAL REGIONAL DE ALTA COMPLEJIDAD
-                </span>
-                <span style={{ fontSize: '9px', color: 'var(--accent)', fontFamily: 'var(--mono)', fontWeight: 'bold' }}>
+                <input
+                  type="text"
+                  value={nombreInstitucion}
+                  onChange={(e) => setNombreInstitucion(e.target.value.toUpperCase())}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: '1px dashed rgba(56, 189, 248, 0.3)',
+                    color: 'var(--text)',
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    letterSpacing: '0.5px',
+                    width: '240px',
+                    padding: '2px 0',
+                    outline: 'none',
+                    fontFamily: 'var(--body)',
+                    transition: 'border-color 0.2s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = 'var(--accent)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = 'rgba(56, 189, 248, 0.3)';
+                  }}
+                  title="Haga click e ingrese el nombre de la institución para configurar el encabezado"
+                  placeholder="INGRESE EL NOMBRE DE LA INSTITUCIÓN"
+                />
+                <span style={{ fontSize: '9px', color: 'var(--accent)', fontFamily: 'var(--mono)', fontWeight: 'bold', marginTop: '2px' }}>
                   {currentSpecialty ? currentSpecialty.especialidad.toUpperCase() : 'SERVICIO ACTIVO'}
                 </span>
               </div>
@@ -287,7 +314,7 @@ const App: React.FC = () => {
         color: 'var(--text3)'
       }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-          <span>SADE v1.0.0 — Sistema Automatizado de Dotación de Enfermería</span>
+          <span>Escuela de Enfermería - UNRC | Desarrollo: Ideas Digitales</span>
           <span>Regulado por Ley 24.004 / Ley 10.780</span>
         </div>
       </footer>
