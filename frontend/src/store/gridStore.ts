@@ -29,6 +29,9 @@ export interface GridState {
   inicializarPlanilla: (mes: number, anio: number, feriados: number[]) => void;
   asignarTurno: (personalId: string, dia: number, tipo: TurnoTipo) => void;
   limpiarPlanilla: () => void;
+  agregarEnfermero: (enfermero: PersonalMock) => void;
+  eliminarEnfermero: (id: string) => void;
+  editarEnfermero: (enfermero: PersonalMock) => void;
 }
 
 // Datos simulados (Mock Staff) de enfermeros activos asignados a este servicio
@@ -108,7 +111,9 @@ const MOCK_STAFF: PersonalMock[] = [
 ];
 
 export const useGridStore = create<GridState>((set, get) => ({
-  personal: MOCK_STAFF,
+  personal: typeof window !== 'undefined' && localStorage.getItem('sade_personal')
+    ? JSON.parse(localStorage.getItem('sade_personal')!)
+    : MOCK_STAFF,
   turnos: {},
   mes: 6,
   anio: 2026,
@@ -118,8 +123,9 @@ export const useGridStore = create<GridState>((set, get) => ({
   inicializarPlanilla: (mes, anio, feriados) => {
     const totalDays = new Date(anio, mes, 0).getDate();
     const turnos: TurnosMapa = {};
+    const currentStaff = get().personal;
 
-    MOCK_STAFF.forEach((enfermero) => {
+    currentStaff.forEach((enfermero) => {
       turnos[enfermero.id] = {};
       for (let day = 1; day <= totalDays; day++) {
         // Inicializar por defecto con su turno fijo si lo tiene, de lo contrario vacío
@@ -158,5 +164,49 @@ export const useGridStore = create<GridState>((set, get) => ({
   limpiarPlanilla: () => {
     const { mes, anio, feriados } = get();
     get().inicializarPlanilla(mes, anio, feriados);
+  },
+
+  agregarEnfermero: (enf) => {
+    const { personal, turnos } = get();
+    const updated = [...personal, enf];
+    localStorage.setItem('sade_personal', JSON.stringify(updated));
+    
+    // Inicializar turnos para el nuevo enfermero
+    const newTurnos = { ...turnos };
+    newTurnos[enf.id] = {};
+    const { mes, anio, feriados } = get();
+    const totalDays = new Date(anio, mes, 0).getDate();
+    for (let day = 1; day <= totalDays; day++) {
+      const date = new Date(anio, mes - 1, day);
+      const dayOfWeek = date.getDay();
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+      const isFeriado = feriados.includes(day);
+
+      if (isFeriado || isWeekend) {
+        newTurnos[enf.id][day] = 'F';
+      } else if (enf.turno_fijo) {
+        newTurnos[enf.id][day] = enf.turno_fijo;
+      } else {
+        newTurnos[enf.id][day] = '';
+      }
+    }
+    
+    set({ personal: updated, turnos: newTurnos });
+  },
+
+  eliminarEnfermero: (id) => {
+    const { personal, turnos } = get();
+    const updated = personal.filter((p) => p.id !== id);
+    localStorage.setItem('sade_personal', JSON.stringify(updated));
+    const newTurnos = { ...turnos };
+    delete newTurnos[id];
+    set({ personal: updated, turnos: newTurnos });
+  },
+
+  editarEnfermero: (enf) => {
+    const { personal } = get();
+    const updated = personal.map((p) => p.id === enf.id ? enf : p);
+    localStorage.setItem('sade_personal', JSON.stringify(updated));
+    set({ personal: updated });
   }
 }));

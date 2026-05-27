@@ -14,8 +14,7 @@ export const usePdf = () => {
     dotacion, 
     logoBase64,
     nombreInstitucion,
-    nombreDepartamento,
-    nombreSupervisor
+    nombreDepartamento
   } = useConfigStore();
   const { personal, turnos, feriados } = useGridStore();
 
@@ -306,25 +305,17 @@ export const usePdf = () => {
 
         // Jefe de Servicio block
         doc.line(40, sigBlockY + 14, 110, sigBlockY + 14);
-        doc.setFont('Helvetica', 'bold');
-        doc.setFontSize(8.5);
-        doc.setTextColor(55, 65, 81);
-        doc.text(nombreSupervisor, 75, sigBlockY + 18, { align: 'center' });
         doc.setFont('Helvetica', 'normal');
-        doc.setFontSize(7.5);
+        doc.setFontSize(8);
         doc.setTextColor(107, 114, 128);
-        doc.text('Firma y Aclaración - Jefe de Servicio', 75, sigBlockY + 22, { align: 'center' });
+        doc.text('Firma y Aclaración - Jefe de Servicio', 75, sigBlockY + 19, { align: 'center' });
 
         // Director Médico block
         doc.line(180, sigBlockY + 14, 250, sigBlockY + 14);
-        doc.setFont('Helvetica', 'bold');
-        doc.setFontSize(8.5);
-        doc.setTextColor(55, 65, 81);
-        doc.text('Dra. Antonela Roccuzzo', 215, sigBlockY + 18, { align: 'center' });
         doc.setFont('Helvetica', 'normal');
-        doc.setFontSize(7.5);
+        doc.setFontSize(8);
         doc.setTextColor(107, 114, 128);
-        doc.text('Firma y Aclaración - Director Médico', 215, sigBlockY + 22, { align: 'center' });
+        doc.text('Firma y Aclaración - Director Médico', 215, sigBlockY + 19, { align: 'center' });
 
         doc.setLineDashPattern([], 0); // reset
       }

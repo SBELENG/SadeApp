@@ -18,10 +18,22 @@ export const GridPage: React.FC = () => {
   const {
     inicializarPlanilla,
     limpiarPlanilla,
-    personal
+    personal,
+    agregarEnfermero,
+    eliminarEnfermero
   } = useGridStore();
 
   const { exportToPdf } = usePdf();
+
+  const [showRosterModal, setShowRosterModal] = React.useState(false);
+  const [formName, setFormName] = React.useState('');
+  const [formApellido, setFormApellido] = React.useState('');
+  const [formDni, setFormDni] = React.useState('');
+  const [formMatricula, setFormMatricula] = React.useState('');
+  const [formNivel, setFormNivel] = React.useState<'LICENCIADO' | 'ENFERMERO_PROFESIONAL' | 'ENFERMERO_ESPECIALISTA' | 'AUXILIAR'>('ENFERMERO_PROFESIONAL');
+  const [formTurnoFijo, setFormTurnoFijo] = React.useState<'M' | 'T' | 'N' | 'ROTATIVO'>('ROTATIVO');
+  const [formAntiguedad, setFormAntiguedad] = React.useState(0);
+  const [formCompensatorio, setFormCompensatorio] = React.useState(0);
 
   const currentSpecialty = useMemo(() => ESPECIALIDADES_INDICES[serviceKey], [serviceKey]);
 
@@ -79,6 +91,9 @@ export const GridPage: React.FC = () => {
             style={{ borderColor: 'var(--accent5)', color: 'var(--accent5)' }}
           >
             ⚠️ Reiniciar
+          </button>
+          <button className="btn-secondary-tech" onClick={() => setShowRosterModal(true)}>
+            👥 Nómina
           </button>
           <button className="btn-secondary-tech" onClick={() => setCurrentPage('dashboard')}>
             📊 Métricas
@@ -190,6 +205,290 @@ export const GridPage: React.FC = () => {
         </div>
       </div>
 
+      {/* MODAL DE NÓMINA - PREMIUM TECH GLASS */}
+      {showRosterModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(5, 8, 16, 0.85)',
+          backdropFilter: 'blur(12px)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div className="card-premium" style={{
+            maxWidth: '900px',
+            width: '100%',
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column',
+            padding: 0,
+            overflow: 'hidden',
+            border: '1px solid rgba(56, 189, 248, 0.25)',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '20px 24px',
+              borderBottom: '1px solid var(--border)',
+              background: 'rgba(10, 15, 30, 0.7)'
+            }}>
+              <div>
+                <span className="badge-tech badge-blue" style={{ marginBottom: '4px' }}>Gestión de Personal</span>
+                <h3 style={{ margin: 0, fontFamily: 'var(--display)', fontSize: '18px', fontWeight: 'bold' }}>Nómina del Servicio</h3>
+              </div>
+              <button 
+                onClick={() => setShowRosterModal(false)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text3)',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  lineHeight: 1
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1.2fr 1fr',
+              gap: '24px',
+              padding: '24px',
+              overflowY: 'auto',
+              flex: 1
+            }}>
+              {/* Listado de Personal */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <h4 style={{ margin: '0 0 8px 0', color: 'var(--heading)', fontSize: '14px', fontFamily: 'var(--mono)', textTransform: 'uppercase' }}>
+                  Enfermeros Activos ({personal.length})
+                </h4>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '50vh', paddingRight: '8px' }}>
+                  {personal.map((enfermero) => {
+                    const formatLabel = enfermero.nivel_formacion === 'LICENCIADO' 
+                      ? 'Licenciado/Esp.' 
+                      : enfermero.nivel_formacion === 'ENFERMERO_PROFESIONAL' 
+                      ? 'Enf. Profesional' 
+                      : enfermero.nivel_formacion === 'ENFERMERO_ESPECIALISTA'
+                      ? 'Especialista'
+                      : 'Enfermero';
+                    
+                    return (
+                      <div 
+                        key={enfermero.id}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '12px',
+                          background: 'rgba(56, 189, 248, 0.02)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px'
+                        }}
+                      >
+                        <div style={{ textAlign: 'left' }}>
+                          <strong style={{ display: 'block', fontSize: '13.5px', color: 'var(--text)' }}>
+                            {enfermero.apellido}, {enfermero.nombre}
+                          </strong>
+                          <span style={{ fontSize: '11px', color: 'var(--text3)' }}>
+                            M. {enfermero.matricula} · {formatLabel}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`¿Desea quitar a ${enfermero.nombre} ${enfermero.apellido} de la nómina?`)) {
+                              eliminarEnfermero(enfermero.id);
+                            }
+                          }}
+                          style={{
+                            background: 'transparent',
+                            border: '1px solid rgba(239, 68, 68, 0.4)',
+                            color: '#f87171',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '11px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Quitar
+                        </button>
+                      </div>
+                    );
+                  })}
+
+                  {personal.length === 0 && (
+                    <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text3)', border: '1px dashed var(--border)', borderRadius: '8px' }}>
+                      No hay personal registrado en este servicio.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Agregar Personal */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', borderLeft: '1px solid var(--border)', paddingLeft: '24px' }}>
+                <h4 style={{ margin: '0 0 8px 0', color: 'var(--heading)', fontSize: '14px', fontFamily: 'var(--mono)', textTransform: 'uppercase' }}>
+                  Ingresar Nuevo Integrante
+                </h4>
+                
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!formName || !formApellido || !formMatricula) {
+                      alert('Por favor complete Nombre, Apellido y Matrícula.');
+                      return;
+                    }
+
+                    const newEnfermero = {
+                      id: `staff-${Date.now()}`,
+                      nombre: formName,
+                      apellido: formApellido,
+                      dni: formDni || `${Math.floor(20 + Math.random() * 20)}.${Math.floor(100 + Math.random() * 900)}.${Math.floor(100 + Math.random() * 900)}`,
+                      matricula: formMatricula,
+                      nivel_formacion: formNivel,
+                      jornada_horas: 8,
+                      turno_fijo: formTurnoFijo === 'ROTATIVO' ? null : formTurnoFijo,
+                      antiguedad_anos: formAntiguedad,
+                      compensatorio_pendiente: formCompensatorio
+                    };
+
+                    agregarEnfermero(newEnfermero as any);
+
+                    // Reset form
+                    setFormName('');
+                    setFormApellido('');
+                    setFormDni('');
+                    setFormMatricula('');
+                    setFormNivel('ENFERMERO_PROFESIONAL');
+                    setFormTurnoFijo('ROTATIVO');
+                    setFormAntiguedad(0);
+                    setFormCompensatorio(0);
+                  }}
+                  style={{ display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}
+                >
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ fontSize: '11px', color: 'var(--text3)' }}>Nombre *</label>
+                      <input 
+                        type="text" 
+                        value={formName}
+                        onChange={(e) => setFormName(e.target.value)}
+                        placeholder="Ej: María"
+                        style={{ width: '100%', padding: '8px 12px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text)', outline: 'none' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '11px', color: 'var(--text3)' }}>Apellido *</label>
+                      <input 
+                        type="text" 
+                        value={formApellido}
+                        onChange={(e) => setFormApellido(e.target.value)}
+                        placeholder="Ej: García"
+                        style={{ width: '100%', padding: '8px 12px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text)', outline: 'none' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ fontSize: '11px', color: 'var(--text3)' }}>DNI</label>
+                      <input 
+                        type="text" 
+                        value={formDni}
+                        onChange={(e) => setFormDni(e.target.value)}
+                        placeholder="Ej: 30.123.456"
+                        style={{ width: '100%', padding: '8px 12px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text)', outline: 'none' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '11px', color: 'var(--text3)' }}>Matrícula *</label>
+                      <input 
+                        type="text" 
+                        value={formMatricula}
+                        onChange={(e) => setFormMatricula(e.target.value)}
+                        placeholder="Ej: EP-101"
+                        style={{ width: '100%', padding: '8px 12px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text)', outline: 'none' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '11px', color: 'var(--text3)' }}>Nivel de Formación</label>
+                    <select
+                      value={formNivel}
+                      onChange={(e) => setFormNivel(e.target.value as any)}
+                      style={{ width: '100%', padding: '8px 12px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text)', outline: 'none' }}
+                    >
+                      <option value="LICENCIADO">Licenciado / Especialista</option>
+                      <option value="ENFERMERO_PROFESIONAL">Enfermero Profesional</option>
+                      <option value="AUXILIAR">Enfermero Auxiliar</option>
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ fontSize: '11px', color: 'var(--text3)' }}>Turno Fijo</label>
+                      <select
+                        value={formTurnoFijo}
+                        onChange={(e) => setFormTurnoFijo(e.target.value as any)}
+                        style={{ width: '100%', padding: '8px 12px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text)', outline: 'none' }}
+                      >
+                        <option value="ROTATIVO">Rotativo (Sin Fijo)</option>
+                        <option value="M">Mañana (M)</option>
+                        <option value="T">Tarde (T)</option>
+                        <option value="N">Noche (N)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '11px', color: 'var(--text3)' }}>Antigüedad (Años)</label>
+                      <input 
+                        type="number" 
+                        value={formAntiguedad}
+                        onChange={(e) => setFormAntiguedad(parseInt(e.target.value) || 0)}
+                        placeholder="Ej: 5"
+                        min="0"
+                        style={{ width: '100%', padding: '8px 12px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text)', outline: 'none' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '11px', color: 'var(--text3)' }}>Compensatorios Trasladados (Opcional)</label>
+                    <input 
+                      type="number" 
+                      value={formCompensatorio}
+                      onChange={(e) => setFormCompensatorio(parseInt(e.target.value) || 0)}
+                      placeholder="Francos compensatorios pendientes a saldar"
+                      min="0"
+                      style={{ width: '100%', padding: '8px 12px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text)', outline: 'none' }}
+                    />
+                  </div>
+
+                  <button 
+                    type="submit"
+                    className="btn-premium" 
+                    style={{ marginTop: '14px', width: '100%', height: '42px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'var(--display)', fontSize: '13.5px', fontWeight: 'bold' }}
+                  >
+                    ＋ Agregar a la Nómina
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

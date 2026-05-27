@@ -58,7 +58,14 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
   logoBase64: typeof window !== 'undefined' ? localStorage.getItem('sade_institucion_logo') : null,
   nombreInstitucion: typeof window !== 'undefined' ? (localStorage.getItem('sade_nombre_institucion') || 'HOSPITAL REGIONAL DE ALTA COMPLEJIDAD') : 'HOSPITAL REGIONAL DE ALTA COMPLEJIDAD',
   nombreDepartamento: typeof window !== 'undefined' ? (localStorage.getItem('sade_nombre_departamento') || 'MEDICINA INTERNA') : 'MEDICINA INTERNA',
-  nombreSupervisor: typeof window !== 'undefined' ? (localStorage.getItem('sade_nombre_supervisor') || 'LIC. LIONEL MESSI') : 'LIC. LIONEL MESSI',
+  nombreSupervisor: typeof window !== 'undefined' ? (() => {
+    const cached = localStorage.getItem('sade_nombre_supervisor');
+    if (!cached || cached === 'LIC. LIONEL MESSI') {
+      localStorage.setItem('sade_nombre_supervisor', 'JEFE DE SERVICIO');
+      return 'JEFE DE SERVICIO';
+    }
+    return cached;
+  })() : 'JEFE DE SERVICIO',
 
   setCurrentPage: (page) => set({ currentPage: page }),
 
