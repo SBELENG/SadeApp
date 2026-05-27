@@ -14,7 +14,7 @@ describe('useShiftValidation — Reglas de Validación Legal (REQ-003 a REQ-007)
       matricula: 'EP-1',
       nivel_formacion: 'ENFERMERO_PROFESIONAL',
       jornada_horas: 8,
-      turno_fijo: null,
+      turno_fijo: 'M',
       antiguedad_anos: 5,
       compensatorio_pendiente: 0
     },
@@ -26,7 +26,7 @@ describe('useShiftValidation — Reglas de Validación Legal (REQ-003 a REQ-007)
       matricula: 'AE-1',
       nivel_formacion: 'AUXILIAR',
       jornada_horas: 8,
-      turno_fijo: null,
+      turno_fijo: 'M',
       antiguedad_anos: 2,
       compensatorio_pendiente: 0
     }
@@ -133,5 +133,21 @@ describe('useShiftValidation — Reglas de Validación Legal (REQ-003 a REQ-007)
     // El Auxiliar ya no debería tener alerta roja porque cuenta con supervisión profesional en ese turno
     const res = validarTurnoCelda('auxiliar-1', 1, 'M', mockPersonal, turnosMapa, feriados);
     expect(res).toBeNull();
+  });
+
+  it('REQ-010: debe bloquear con alerta roja (RED) si el enfermero no tiene turno fijo definido', () => {
+    const feriados: number[] = [];
+    const turnosMapa: TurnosMapa = {
+      'enfermero-1': {}
+    };
+    
+    // Clonar y poner turno_fijo: null
+    const personalSinTurnoFijo = mockPersonal.map(p => p.id === 'enfermero-1' ? { ...p, turno_fijo: null } : p);
+    
+    const res = validarTurnoCelda('enfermero-1', 1, 'M', personalSinTurnoFijo as any, turnosMapa, feriados);
+    expect(res).not.toBeNull();
+    expect(res?.level).toBe('RED');
+    expect(res?.message).toContain('sin turno fijo definido');
+    expect(res?.basis).toBe('REQ-010 — Asignación de Turno Fijo Requerida');
   });
 });

@@ -195,7 +195,12 @@ export const ShiftCell: React.FC<ShiftCellProps> = ({
         textAlign: 'center',
         verticalAlign: 'middle',
         position: 'relative',
-        borderLeft: '1px solid var(--border)'
+        borderLeft: '1px solid var(--border)',
+        background: isFeriado 
+          ? 'rgba(251, 146, 60, 0.08)' // beautiful subtle distinct background for holiday column cell!
+          : isWeekend 
+          ? 'rgba(255, 255, 255, 0.02)' 
+          : 'transparent'
       }}
     >
       <div 

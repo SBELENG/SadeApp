@@ -27,10 +27,19 @@ export function validarTurnoCelda(
   turnosMapa: TurnosMapa,
   feriados: number[]
 ): AlertaResultado | null {
-  if (!tipo) return null;
-
   const enfermero = personal.find((p) => p.id === personalId);
   if (!enfermero) return null;
+
+  // REQ-010 — Asignación de Turno Fijo Requerida (Rojo 🔴 - BLOQUEANTE)
+  if (enfermero.turno_fijo === null) {
+    return {
+      level: 'RED',
+      message: 'Enfermero activo sin turno fijo definido. Ingrese a la Nómina para asignar su turno.',
+      basis: 'REQ-010 — Asignación de Turno Fijo Requerida'
+    };
+  }
+
+  if (!tipo) return null;
 
   const susTurnos = turnosMapa[personalId] || {};
 
@@ -38,7 +47,7 @@ export function validarTurnoCelda(
   const esLaboral = (t: TurnoTipo) => t === 'M' || t === 'T' || t === 'N';
 
   // 1. REQ-003 — Franco Compensatorio por Feriado Trabajado (Amarillo 🟡)
-  if (feriados.includes(dia) && (tipo === 'M' || tipo === 'T')) {
+  if (feriados.includes(dia) && esLaboral(tipo)) {
     return {
       level: 'YELLOW',
       message: 'Turno laborado en día Feriado Nacional. Genera franco compensatorio.',

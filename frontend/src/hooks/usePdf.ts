@@ -14,9 +14,10 @@ export const usePdf = () => {
     dotacion, 
     logoBase64,
     nombreInstitucion,
-    nombreDepartamento
+    nombreDepartamento,
+    feriados
   } = useConfigStore();
-  const { personal, turnos, feriados } = useGridStore();
+  const { personal, turnos } = useGridStore();
 
   const exportToPdf = () => {
     if (!dotacion) {
@@ -243,7 +244,17 @@ export const usePdf = () => {
         
         // Calculate dynamic target francos
         const baseFrancos = totalDays === 31 ? 9 : 8;
-        const targetFrancos = baseFrancos + feriados.length + (enfermero.compensatorio_pendiente || 0);
+        
+        // Contar feriados nacionales trabajados para los compensatorios +1
+        let feriadosTrabajados = 0;
+        feriados.forEach((day) => {
+          const shift = empTurnos[day];
+          if (shift === 'M' || shift === 'T' || shift === 'N') {
+            feriadosTrabajados++;
+          }
+        });
+        
+        const targetFrancos = baseFrancos + feriados.length + (enfermero.compensatorio_pendiente || 0) + feriadosTrabajados;
 
         if (francosAsignadosCount >= targetFrancos) {
           doc.setTextColor(16, 124, 65); // green

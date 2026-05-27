@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useGridStore } from '../../store/gridStore';
+import { useConfigStore } from '../../store/configStore';
 import { calcFrancosBase } from '../../utils/francos.calc';
 
 interface FrancoCounterProps {
@@ -13,12 +14,22 @@ export const FrancoCounter: React.FC<FrancoCounterProps> = ({
 }) => {
   const turnos = useGridStore((state) => state.turnos[personalId]);
   const diasMes = useGridStore((state) => state.diasMes);
-  const feriados = useGridStore((state) => state.feriados);
+  const feriados = useConfigStore((state) => state.feriados);
 
-  // Calcular la meta de francos requeridos en el mes
+  // Contar cuántos feriados nacionales trabajó efectivamente este enfermero
+  const feriadosTrabajados = useMemo(() => {
+    if (!turnos || !feriados) return 0;
+    return feriados.filter((day) => {
+      const shift = turnos[day];
+      return shift === 'M' || shift === 'T' || shift === 'N';
+    }).length;
+  }, [turnos, feriados]);
+
+  // Calcular la meta de francos requeridos en el mes, incluyendo los compensatorios generados en feriados
   const totalFrancosRequeridos = useMemo(() => {
-    return calcFrancosBase(diasMes, feriados.length, compensatoriosTrasladados);
-  }, [diasMes, feriados, compensatoriosTrasladados]);
+    const base = calcFrancosBase(diasMes, feriados.length, compensatoriosTrasladados);
+    return base + feriadosTrabajados;
+  }, [diasMes, feriados, compensatoriosTrasladados, feriadosTrabajados]);
 
   // Contar los francos actualmente asignados a este enfermero
   const francosAsignados = useMemo(() => {

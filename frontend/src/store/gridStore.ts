@@ -68,7 +68,7 @@ const MOCK_STAFF: PersonalMock[] = [
     matricula: 'AE-303',
     nivel_formacion: 'AUXILIAR',
     jornada_horas: 8,
-    turno_fijo: null,
+    turno_fijo: 'M',
     antiguedad_anos: 4,
     compensatorio_pendiente: 0
   },
@@ -92,7 +92,7 @@ const MOCK_STAFF: PersonalMock[] = [
     matricula: 'EP-505',
     nivel_formacion: 'ENFERMERO_PROFESIONAL',
     jornada_horas: 8,
-    turno_fijo: null,
+    turno_fijo: 'M',
     antiguedad_anos: 6,
     compensatorio_pendiente: 0
   },
@@ -107,13 +107,30 @@ const MOCK_STAFF: PersonalMock[] = [
     turno_fijo: 'T',
     antiguedad_anos: 3,
     compensatorio_pendiente: 0
+  },
+  {
+    id: 'staff-7',
+    nombre: 'Carlos',
+    apellido: 'Sánchez',
+    dni: '29.888.999',
+    matricula: 'EP-707',
+    nivel_formacion: 'ENFERMERO_PROFESIONAL',
+    jornada_horas: 8,
+    turno_fijo: 'N',
+    antiguedad_anos: 5,
+    compensatorio_pendiente: 0
   }
 ];
 
 export const useGridStore = create<GridState>((set, get) => ({
-  personal: typeof window !== 'undefined' && localStorage.getItem('sade_personal')
-    ? JSON.parse(localStorage.getItem('sade_personal')!)
-    : MOCK_STAFF,
+  personal: typeof window !== 'undefined' ? (() => {
+    const cached = localStorage.getItem('sade_personal');
+    if (!cached || JSON.parse(cached).length === 6) {
+      localStorage.setItem('sade_personal', JSON.stringify(MOCK_STAFF));
+      return MOCK_STAFF;
+    }
+    return JSON.parse(cached);
+  })() : MOCK_STAFF,
   turnos: {},
   mes: 6,
   anio: 2026,
@@ -125,22 +142,79 @@ export const useGridStore = create<GridState>((set, get) => ({
     const turnos: TurnosMapa = {};
     const currentStaff = get().personal;
 
-    currentStaff.forEach((enfermero) => {
-      turnos[enfermero.id] = {};
+    // 1. Inicializar todas las celdas de todos los enfermeros en vacío ''
+    currentStaff.forEach((enf) => {
+      turnos[enf.id] = {};
       for (let day = 1; day <= totalDays; day++) {
-        // Inicializar por defecto con su turno fijo si lo tiene, de lo contrario vacío
-        // Los fines de semana (Sábado = 6, Domingo = 0) o feriados se pueden inicializar en Franco 'F' por cortesía
+        turnos[enf.id][day] = '';
+      }
+    });
+
+    // 2. Correr el motor de distribución escalonada por cada grupo de turno fijo M, T, N
+    ['M', 'T', 'N'].forEach((turno) => {
+      const staffDeTurno = currentStaff.filter((p) => p.turno_fijo === turno);
+      const k = staffDeTurno.length;
+      if (k === 0) return;
+
+      // Todos los enfermeros de este turno fijo comienzan trabajando en su turno
+      staffDeTurno.forEach((enf) => {
+        for (let day = 1; day <= totalDays; day++) {
+          turnos[enf.id][day] = turno as TurnoTipo;
+        }
+      });
+
+      const baseFrancos = totalDays === 31 ? 9 : 8;
+      const targetFrancos = baseFrancos + feriados.length;
+      
+      const francosAsignados: Record<string, number> = {};
+      staffDeTurno.forEach((enf) => {
+        francosAsignados[enf.id] = 0;
+      });
+
+      // Primero: Asignar francos en Fines de Semana y Feriados de forma escalonada (rotativa)
+      // Aseguramos que exactamente un enfermero cubra la guardia en cada fin de semana/feriado.
+      let weekendHolidayCount = 0;
+      for (let day = 1; day <= totalDays; day++) {
         const date = new Date(anio, mes - 1, day);
         const dayOfWeek = date.getDay();
         const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
         const isFeriado = feriados.includes(day);
 
-        if (isFeriado || isWeekend) {
-          turnos[enfermero.id][day] = 'F'; // Pre-inicializar con Franco en feriados y fines de semana
-        } else if (enfermero.turno_fijo) {
-          turnos[enfermero.id][day] = enfermero.turno_fijo; // Asignar su turno fijo
-        } else {
-          turnos[enfermero.id][day] = ''; // Rotativo vacío
+        if (isWeekend || isFeriado) {
+          // El enfermero asignado a trabajar es index = weekendHolidayCount % k
+          const enfQueTrabajaIdx = weekendHolidayCount % k;
+          
+          staffDeTurno.forEach((enf, idx) => {
+            if (idx !== enfQueTrabajaIdx && francosAsignados[enf.id] < targetFrancos) {
+              turnos[enf.id][day] = 'F';
+              francosAsignados[enf.id]++;
+            }
+          });
+          weekendHolidayCount++;
+        }
+      }
+
+      // Segundo: Completar los francos restantes en días de semana
+      // Ordenamos en cada paso para dar franco a quien tenga menos acumulados
+      const maxFrancosSimultaneos = Math.max(1, k - 1);
+      for (let day = 1; day <= totalDays; day++) {
+        const date = new Date(anio, mes - 1, day);
+        const dayOfWeek = date.getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        const isFeriado = feriados.includes(day);
+
+        if (!isWeekend && !isFeriado) {
+          const sortedStaff = [...staffDeTurno].sort((a, b) => francosAsignados[a.id] - francosAsignados[b.id]);
+          
+          let francosAsignadosHoy = 0;
+          for (let i = 0; i < sortedStaff.length; i++) {
+            const enf = sortedStaff[i];
+            if (francosAsignados[enf.id] < targetFrancos && francosAsignadosHoy < maxFrancosSimultaneos) {
+              turnos[enf.id][day] = 'F';
+              francosAsignados[enf.id]++;
+              francosAsignadosHoy++;
+            }
+          }
         }
       }
     });

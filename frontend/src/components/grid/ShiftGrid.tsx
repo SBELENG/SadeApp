@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
 import { useGridStore } from '../../store/gridStore';
+import { useConfigStore } from '../../store/configStore';
 import DayHeader from './DayHeader';
 import ShiftCell from './ShiftCell';
 import FrancoCounter from './FrancoCounter';
 
 export const ShiftGrid: React.FC = () => {
-  const { personal, turnos, diasMes, feriados, mes, anio } = useGridStore();
+  const { personal, turnos, diasMes, mes, anio } = useGridStore();
+  const feriados = useConfigStore((state) => state.feriados);
 
   // Crear array con los días del mes
   const daysArray = useMemo(() => {
