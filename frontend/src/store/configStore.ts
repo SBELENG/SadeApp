@@ -19,6 +19,8 @@ export interface ConfigState {
   dotacion: DotacionOutput | null;
   logoBase64: string | null;
   nombreInstitucion: string;
+  nombreDepartamento: string;
+  nombreSupervisor: string;
   
   // Actions
   setCurrentPage: (page: 'config' | 'dashboard' | 'grid') => void;
@@ -34,6 +36,8 @@ export interface ConfigState {
   setRatioElegido: (ratio: 'min' | 'max') => void;
   setLogoBase64: (logo: string | null) => void;
   setNombreInstitucion: (nombre: string) => void;
+  setNombreDepartamento: (nombre: string) => void;
+  setNombreSupervisor: (nombre: string) => void;
   ejecutarCalculo: () => void;
 }
 
@@ -53,6 +57,8 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
   dotacion: null,
   logoBase64: typeof window !== 'undefined' ? localStorage.getItem('sade_institucion_logo') : null,
   nombreInstitucion: typeof window !== 'undefined' ? (localStorage.getItem('sade_nombre_institucion') || 'HOSPITAL REGIONAL DE ALTA COMPLEJIDAD') : 'HOSPITAL REGIONAL DE ALTA COMPLEJIDAD',
+  nombreDepartamento: typeof window !== 'undefined' ? (localStorage.getItem('sade_nombre_departamento') || 'MEDICINA INTERNA') : 'MEDICINA INTERNA',
+  nombreSupervisor: typeof window !== 'undefined' ? (localStorage.getItem('sade_nombre_supervisor') || 'LIC. LIONEL MESSI') : 'LIC. LIONEL MESSI',
 
   setCurrentPage: (page) => set({ currentPage: page }),
 
@@ -71,6 +77,11 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
       indexI = parseFloat(((spec.minI + spec.maxI) / 2).toFixed(1));
     }
 
+    const uppercaseSpecName = spec.especialidad.toUpperCase();
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sade_nombre_departamento', uppercaseSpecName);
+    }
+
     set({ 
       serviceKey: key, 
       isCritical, 
@@ -78,7 +89,8 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
       nivel,
       unidades: 1,
       ratioElegido: 'min',
-      dotacion: null // resetear cálculo al cambiar especialidad
+      dotacion: null, // resetear cálculo al cambiar especialidad
+      nombreDepartamento: uppercaseSpecName
     });
   },
 
@@ -135,6 +147,24 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
       localStorage.removeItem('sade_nombre_institucion');
     }
     set({ nombreInstitucion: nombre });
+  },
+
+  setNombreDepartamento: (nombre) => {
+    if (nombre) {
+      localStorage.setItem('sade_nombre_departamento', nombre);
+    } else {
+      localStorage.removeItem('sade_nombre_departamento');
+    }
+    set({ nombreDepartamento: nombre });
+  },
+
+  setNombreSupervisor: (nombre) => {
+    if (nombre) {
+      localStorage.setItem('sade_nombre_supervisor', nombre);
+    } else {
+      localStorage.removeItem('sade_nombre_supervisor');
+    }
+    set({ nombreSupervisor: nombre });
   },
 
   ejecutarCalculo: () => {

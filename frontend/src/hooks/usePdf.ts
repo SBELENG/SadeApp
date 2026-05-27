@@ -5,7 +5,18 @@ import { validarTurnoCelda } from './useShiftValidation';
 import { ESPECIALIDADES_INDICES } from '../utils/constants/indices';
 
 export const usePdf = () => {
-  const { serviceKey, month, year, beds, nivel, dotacion, logoBase64 } = useConfigStore();
+  const { 
+    serviceKey, 
+    month, 
+    year, 
+    beds, 
+    nivel, 
+    dotacion, 
+    logoBase64,
+    nombreInstitucion,
+    nombreDepartamento,
+    nombreSupervisor
+  } = useConfigStore();
   const { personal, turnos, feriados } = useGridStore();
 
   const exportToPdf = () => {
@@ -51,11 +62,15 @@ export const usePdf = () => {
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(12);
       doc.setTextColor(31, 41, 55); // #1f2937
-      doc.text('HOSPITAL REGIONAL DE ALTA COMPLEJIDAD', 31, 17);
+      doc.text(nombreInstitucion.toUpperCase(), 31, 17);
       doc.setFont('Helvetica', 'normal');
       doc.setFontSize(8.5);
       doc.setTextColor(75, 85, 99); // #4b5563
-      doc.text(`SERVICIO DE ${specialtyName.toUpperCase()}`, 31, 22);
+      
+      const deptText = nombreDepartamento.toUpperCase().startsWith('SERVICIO') || nombreDepartamento.toUpperCase().startsWith('ÁREA') 
+        ? nombreDepartamento.toUpperCase() 
+        : `SERVICIO DE ${nombreDepartamento.toUpperCase()}`;
+      doc.text(deptText, 31, 22);
 
       // 3. SADE branding
       doc.setFont('Helvetica', 'bold');
@@ -77,7 +92,7 @@ export const usePdf = () => {
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(8.5);
       doc.setTextColor(55, 65, 81); // #374151
-      const metaText = `ÁREA: ${specialtyName}   |   PERÍODO: ${month.toString().padStart(2, '0')}/${year}   |   CAMAS: ${beds}   |   COMPLEJIDAD: ${nivel === 'tercero' ? '3er Nivel' : '2do Nivel'}`;
+      const metaText = `ÁREA: ${nombreDepartamento.toUpperCase()}   |   PERÍODO: ${month.toString().padStart(2, '0')}/${year}   |   CAMAS: ${beds}   |   COMPLEJIDAD: ${nivel === 'tercero' ? '3er Nivel' : '2do Nivel'}`;
       doc.text(metaText, 15, 32);
 
       const reqText = `Z = ${dotacion.Z_ceil} (P: ${dotacion.P.toFixed(1)}, B: ${dotacion.B.toFixed(1)})   |   DISTRIBUCIÓN REQ: M:${dotacion.Q1} T:${dotacion.Q2} N:${dotacion.Q3}`;
@@ -294,7 +309,7 @@ export const usePdf = () => {
         doc.setFont('Helvetica', 'bold');
         doc.setFontSize(8.5);
         doc.setTextColor(55, 65, 81);
-        doc.text('Lic. Lionel Messi', 75, sigBlockY + 18, { align: 'center' });
+        doc.text(nombreSupervisor, 75, sigBlockY + 18, { align: 'center' });
         doc.setFont('Helvetica', 'normal');
         doc.setFontSize(7.5);
         doc.setTextColor(107, 114, 128);

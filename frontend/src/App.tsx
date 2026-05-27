@@ -3,12 +3,26 @@ import { useConfigStore } from './store/configStore';
 import { ConfigPage } from './pages/ConfigPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { GridPage } from './pages/GridPage';
-import { ESPECIALIDADES_INDICES } from './utils/constants/indices';
+
 
 const App: React.FC = () => {
-  const { currentPage, setCurrentPage, serviceKey, month, year, dotacion, logoBase64, setLogoBase64, nombreInstitucion, setNombreInstitucion } = useConfigStore();
+  const { 
+    currentPage, 
+    setCurrentPage, 
+    month, 
+    year, 
+    dotacion, 
+    logoBase64, 
+    setLogoBase64, 
+    nombreInstitucion, 
+    setNombreInstitucion,
+    nombreDepartamento,
+    setNombreDepartamento,
+    nombreSupervisor,
+    setNombreSupervisor
+  } = useConfigStore();
 
-  const currentSpecialty = ESPECIALIDADES_INDICES[serviceKey];
+
   
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -30,6 +44,15 @@ const App: React.FC = () => {
   const handleLogoAreaClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     fileInputRef.current?.click();
+  };
+
+  const getInitials = (name: string) => {
+    if (!name) return '👤';
+    const cleanName = name.replace(/^(LIC\.|DR\.|DRA\.|ENF\.)\s+/i, '');
+    const parts = cleanName.trim().split(/\s+/);
+    if (parts.length === 0 || !parts[0]) return '👤';
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
 
   return (
@@ -66,7 +89,7 @@ const App: React.FC = () => {
                 <circle cx="0" cy="0" r="2.2" fill="#38bdf8"/>
               </g>
               <text x="52" y="24" fontFamily="Syne, sans-serif" fontSize="25" fontWeight="800" fill="#f1f5f9" letterSpacing="-0.5">SADE</text>
-              <text x="53" y="38" fontFamily="DM Mono, monospace" fontSize="6.2" fontWeight="600" fill="#38bdf8" letterSpacing="0.2">SISTEMA AUTOMATIZADO DE DOTACIÓN DE ENFERMERÍA</text>
+              <text x="53" y="38" fontFamily="Inter, sans-serif" fontSize="7.8" fontWeight="700" fill="#38bdf8" letterSpacing="0.4">SISTEMA AUTOMATIZADO DE DOTACIÓN DE ENFERMERÍA</text>
             </svg>
 
             {/* Separador */}
@@ -197,9 +220,33 @@ const App: React.FC = () => {
                   title="Haga click e ingrese el nombre de la institución para configurar el encabezado"
                   placeholder="INGRESE EL NOMBRE DE LA INSTITUCIÓN"
                 />
-                <span style={{ fontSize: '9px', color: 'var(--accent)', fontFamily: 'var(--mono)', fontWeight: 'bold', marginTop: '2px' }}>
-                  {currentSpecialty ? currentSpecialty.especialidad.toUpperCase() : 'SERVICIO ACTIVO'}
-                </span>
+                <input
+                  type="text"
+                  value={nombreDepartamento}
+                  onChange={(e) => setNombreDepartamento(e.target.value.toUpperCase())}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: '1px dashed rgba(56, 189, 248, 0.4)',
+                    color: 'var(--accent)',
+                    fontSize: '9px',
+                    fontWeight: 'bold',
+                    width: '240px',
+                    outline: 'none',
+                    padding: '2px 0',
+                    marginTop: '2px',
+                    fontFamily: 'var(--mono)',
+                    transition: 'border-color 0.2s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = 'var(--accent)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = 'rgba(56, 189, 248, 0.4)';
+                  }}
+                  title="Haga click para sobrescribir el departamento/servicio"
+                  placeholder="DEPARTAMENTO / SERVICIO"
+                />
               </div>
             </div>
           </div>
@@ -272,25 +319,55 @@ const App: React.FC = () => {
               <span className="mono-data" style={{ fontSize: '11px', color: 'var(--text3)', display: 'block' }}>
                 PERÍODO: {month.toString().padStart(2, '0')}/{year}
               </span>
-              <span style={{ fontSize: '12px', color: 'var(--text2)', fontWeight: '500' }}>
-                Jefe: Lic. Lionel Messi
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text3)', fontWeight: '600' }}>Jefe:</span>
+                <input
+                  type="text"
+                  value={nombreSupervisor}
+                  onChange={(e) => setNombreSupervisor(e.target.value.toUpperCase())}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: '1px dashed rgba(241, 245, 249, 0.2)',
+                    color: 'var(--text2)',
+                    fontSize: '11px',
+                    fontWeight: '500',
+                    width: '130px',
+                    textAlign: 'right',
+                    outline: 'none',
+                    padding: '1px 0',
+                    fontFamily: 'var(--body)'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = 'var(--accent)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = 'rgba(241, 245, 249, 0.2)';
+                  }}
+                  title="Haga click para editar el Jefe de Servicio"
+                  placeholder="JEFE DE SERVICIO"
+                />
+              </div>
             </div>
             
-            <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%)',
-              color: '#0a0e1a',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 'bold',
-              fontSize: '14px',
-              fontFamily: 'var(--display)'
-            }}>
-              LM
+            <div 
+              title={nombreSupervisor || 'Supervisor'}
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%)',
+                color: '#0a0e1a',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                fontSize: '13px',
+                fontFamily: 'var(--display)',
+                boxShadow: '0 2px 8px rgba(56, 189, 248, 0.2)'
+              }}
+            >
+              {getInitials(nombreSupervisor)}
             </div>
           </div>
 
