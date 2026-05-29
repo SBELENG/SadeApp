@@ -67,9 +67,7 @@ export const usePdf = () => {
       doc.setFontSize(8.5);
       doc.setTextColor(75, 85, 99); // #4b5563
       
-      const deptText = nombreDepartamento.toUpperCase().startsWith('SERVICIO') || nombreDepartamento.toUpperCase().startsWith('ÁREA') 
-        ? nombreDepartamento.toUpperCase() 
-        : `SERVICIO DE ${nombreDepartamento.toUpperCase()}`;
+      const deptText = nombreDepartamento.toUpperCase();
       doc.text(deptText, 31, 22);
 
       // 3. SADE branding

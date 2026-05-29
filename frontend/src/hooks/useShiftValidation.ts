@@ -1,5 +1,6 @@
 import { useGridStore } from '../store/gridStore';
-import type { TurnoTipo, TurnosMapa, PersonalMock } from '../store/gridStore';
+import type { TurnoTipo, PersonalMock } from '../store/gridStore';
+import type { TurnosMapa } from '../store/gridStore';
 import { useConfigStore } from '../store/configStore';
 
 export interface AlertaResultado {
@@ -36,6 +37,15 @@ export function validarTurnoCelda(
       level: 'RED',
       message: 'Enfermero activo sin turno fijo definido. Ingrese a la Nómina para asignar su turno.',
       basis: 'REQ-010 — Asignación de Turno Fijo Requerida'
+    };
+  }
+
+  // Validación de Fila Fija Estricta (Rojo 🔴 - BLOQUEANTE)
+  if (tipo && tipo !== 'F' && tipo !== enfermero.turno_fijo) {
+    return {
+      level: 'RED',
+      message: `El enfermero pertenece al Grupo ${enfermero.turno_fijo} fijo y no puede tener asignado el turno ${tipo}.`,
+      basis: 'Paso 1 — Asignación de grupos fijos e inamovibles'
     };
   }
 

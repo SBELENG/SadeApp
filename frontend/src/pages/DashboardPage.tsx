@@ -12,6 +12,7 @@ export const DashboardPage: React.FC = () => {
     nivel,
     year,
     month,
+    feriados,
     isCritical,
     ratio,
     setCurrentPage
@@ -37,12 +38,18 @@ export const DashboardPage: React.FC = () => {
     );
   }
 
-  // Datos para el gráfico de turnos (Mañana, Tarde, Noche, Francos)
+  // Datos para el gráfico de turnos (Mañana, Tarde, Noche, Francos distribuidos)
+  // Qf NO es un grupo de personas — es el tiempo de descanso distribuido en la rotación.
+  // Mostramos francos_totales por persona = francos_base + cantidad_de_feriados.
+  const diasMes = new Date(year, month, 0).getDate();
+  const francosBase = diasMes === 31 ? 9 : 8;
+  const francosTotales = francosBase + feriados.length;
+
   const turnosData = [
-    { name: 'Mañana (Q1)', value: dotacion.Q1, color: '#38bdf8' },
-    { name: 'Tarde (Q2)', value: dotacion.Q2, color: '#818cf8' },
-    { name: 'Noche (Q3)', value: dotacion.Q3, color: '#fb923c' },
-    { name: 'Francos (Qf)', value: dotacion.Qf, color: '#34d399' }
+    { name: 'Mañana (Q1)', value: dotacion.Q1, color: '#38bdf8', label: 'enfermeros' },
+    { name: 'Tarde (Q2)', value: dotacion.Q2, color: '#818cf8', label: 'enfermeros' },
+    { name: 'Noche (Q3)', value: dotacion.Q3, color: '#a78bfa', label: 'enfermeros' },
+    { name: 'Francos distribuidos', value: francosTotales, color: '#34d399', label: 'por persona' }
   ];
 
   // Datos para el gráfico de composición profesional (Licenciados/Especialistas vs Enfermeros)
@@ -57,7 +64,6 @@ export const DashboardPage: React.FC = () => {
       {/* Encabezado */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px' }}>
         <div style={{ textAlign: 'left' }}>
-          <span className="badge-tech badge-green" style={{ marginBottom: '12px' }}>Metodología Balderas Pedrero</span>
           <h1 style={{ marginBottom: '8px' }}>Dashboard de Dotación</h1>
           <p style={{ color: 'var(--text2)', fontSize: '15px' }}>
             Resultados analíticos para <strong style={{ color: 'var(--accent)' }}>{currentSpecialty?.especialidad}</strong> · Camas: {beds} · {nivel === 'segundo' ? '2do Nivel (70/30)' : '3er Nivel (80/20)'} · Período: {month}/{year}
@@ -162,7 +168,7 @@ export const DashboardPage: React.FC = () => {
                 {t.value}
               </span>
               <span style={{ fontSize: '12px', color: 'var(--text3)', display: 'block', marginLeft: '4px' }}>
-                enfermeros
+                {t.label ?? 'enfermeros'}
               </span>
             </div>
           ))}
