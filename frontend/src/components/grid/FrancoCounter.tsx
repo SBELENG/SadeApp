@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useGridStore } from '../../store/gridStore';
 import { useConfigStore } from '../../store/configStore';
-import { calcFrancosBase } from '../../utils/planilla.engine';
+import { calcFrancosBase, calcEstadoSemaforo } from '../../utils/planilla.engine';
 
 interface FrancoCounterProps {
   personalId: string;
@@ -17,43 +17,45 @@ export const FrancoCounter: React.FC<FrancoCounterProps> = ({
   const diasMes = useGridStore((state) => state.diasMes);
   const feriados = useConfigStore((state) => state.feriados);
 
-  // ── DENOMINADOR: fijo al inicio del mes, NUNCA incluye compensatorios ───────
+  // ── [C3] DENOMINADOR: fijo al inicio del mes ────────────────────────────────
   // = francos_base (8 ó 9) + cantidad de feriados del mes
-  // Los compensatorios por feriado trabajado se acreditan en el NUMERADOR, no aquí.
-  const totalFrancosRequeridos = useMemo(() => {
+  // Los compensatorios ganados se suman al NUMERADOR_DISPONIBLE, NO al denominador.
+  const denominador = useMemo(() => {
     if (planillaActual) {
-      // Usar el valor calculado por el motor: francos_base + francos_feriado
+      // El motor ya calcula francos_totales = francos_base + francos_feriado
       return planillaActual.francos_totales;
     }
-    // Fallback: solo base + feriados, SIN compensatoriosTrasladados
+    // Fallback: solo base + feriados
     const base = calcFrancosBase(diasMes);
     return base + feriados.length;
   }, [planillaActual, diasMes, feriados]);
 
-  // ── NUMERADOR: francos 'F' asignados en la planilla ─────────────────────────
+  // ── [C3] COMPENSATORIOS GANADOS este mes ─────────────────────────────────────
+  // Regla C2: N_noche_anterior_feriado + M_feriado + T_feriado
+  // Se almacenan en planilla.compensatorios[personalId] calculados por el motor.
+  const compEsteMes = useMemo(() => {
+    if (planillaActual) {
+      return planillaActual.compensatorios[personalId] ?? 0;
+    }
+    return 0; // sin planilla generada no se puede calcular la regla C2
+  }, [planillaActual, personalId]);
+
+  // ── [C3] NUMERADOR ASIGNADO: celdas F realmente asignadas ───────────────────
   const francosAsignados = useMemo(() => {
     if (!turnos) return 0;
     return Object.values(turnos).filter((tipo) => tipo === 'F').length;
   }, [turnos]);
 
-  // ── COMPENSATORIOS generados este mes (feriados trabajados) ──────────────────
-  // Cada feriado trabajado genera un compensatorio. Esto aparece en el display
-  // como información adicional, pero NO modifica el denominador.
-  const compEsteMes = useMemo(() => {
-    if (planillaActual) {
-      return planillaActual.compensatorios[personalId] ?? 0;
-    }
-    // Fallback: contar feriados trabajados
-    if (!turnos) return 0;
-    return feriados.filter((d) => {
-      const t = turnos[d];
-      return t === 'M' || t === 'T' || t === 'N';
-    }).length;
-  }, [planillaActual, personalId, turnos, feriados]);
+  // ── [C3] NUMERADOR DISPONIBLE = DENOMINADOR + compensatorios ganados ─────────
+  const numeradorDisponible = denominador + compEsteMes;
 
-  const francosRestantes = totalFrancosRequeridos - (francosAsignados + compEsteMes);
-  const isMetaCumplida = francosRestantes <= 0;
-  const isExcedido = francosRestantes < 0;
+  // ── [C3] Semáforo ────────────────────────────────────────────────────────────
+  // verde: asignados == disponibles
+  // amarillo: asignados < disponibles (tiene compensatorios sin usar)
+  // rojo: asignados > disponibles (error crítico)
+  const estadoSemaforo = calcEstadoSemaforo(francosAsignados, numeradorDisponible);
+  const isMetaCumplida = estadoSemaforo === 'verde';
+  const isExcedido = estadoSemaforo === 'rojo';
 
 
   return (
@@ -74,7 +76,7 @@ export const FrancoCounter: React.FC<FrancoCounterProps> = ({
         transition: 'all 0.2s ease',
       }}
     >
-      {/* Contador principal: asignados / requeridos */}
+      {/* [C3] Contador principal: asignados / disponibles */}
       <div
         style={{
           display: 'flex',
@@ -93,9 +95,9 @@ export const FrancoCounter: React.FC<FrancoCounterProps> = ({
               ? 'var(--accent3)'
               : 'var(--accent4)',
           }}
+          title={`Denominador base: ${denominador}${compEsteMes > 0 ? ` + ${compEsteMes} compensatorio(s)` : ''}`}
         >
-          {(francosAsignados + compEsteMes)}/{totalFrancosRequeridos}
-
+          {francosAsignados}/{numeradorDisponible}
         </span>
         <span style={{ fontSize: '9px' }}>
           {isExcedido ? '🔴' : isMetaCumplida ? '🟢' : '🟡'}
