@@ -145,7 +145,12 @@ const App: React.FC = () => {
                       }}
                     />
                     <button
-                      onClick={eliminarLogo}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm('¿Desea quitar el logo institucional?')) {
+                          setLogoBase64(null);
+                        }
+                      }}
                       style={{
                         position: 'absolute',
                         top: '-6px',
