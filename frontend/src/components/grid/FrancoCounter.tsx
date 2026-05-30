@@ -1,10 +1,7 @@
 import React, { useMemo } from 'react';
 import { useGridStore } from '../../store/gridStore';
 import { useConfigStore } from '../../store/configStore';
-
-function calcFrancosBase(diasMes: number): number {
-  return diasMes >= 30 ? 9 : 8;
-}
+import { calcularDenominador } from '../../utils/planilla.engine';
 
 function calcEstadoSemaforo(asignados: number, disponibles: number): 'verde' | 'amarillo' | 'rojo' {
   if (asignados === disponibles) return 'verde';
@@ -31,12 +28,9 @@ export const FrancoCounter: React.FC<FrancoCounterProps> = ({
   // Los compensatorios ganados se suman al NUMERADOR_DISPONIBLE, NO al denominador.
   const denominador = useMemo(() => {
     if (planillaActual) {
-      // El motor ya calcula francos_totales = francos_base + francos_feriado
       return planillaActual.francos_totales;
     }
-    // Fallback: solo base + feriados
-    const base = calcFrancosBase(diasMes);
-    return base + feriados.length;
+    return calcularDenominador(diasMes, feriados);
   }, [planillaActual, diasMes, feriados]);
 
   // ── [C3] COMPENSATORIOS GANADOS este mes ─────────────────────────────────────

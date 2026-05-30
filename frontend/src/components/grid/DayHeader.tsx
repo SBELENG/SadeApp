@@ -7,17 +7,9 @@ interface DayHeaderProps {
   isFeriado: boolean;
 }
 
-type TipoDia = 'habil' | 'sabado' | 'domingo' | 'feriado' | 'feriado_finde';
+import { clasificarDia } from '../../utils/planilla.engine';
 
-export function clasificarDia(dia: number, año: number, mes: number, isFeriado: boolean): TipoDia {
-  const fecha = new Date(año, mes - 1, dia);
-  const dow = fecha.getDay();
-  if (isFeriado && (dow === 0 || dow === 6)) return 'feriado_finde';
-  if (isFeriado) return 'feriado';
-  if (dow === 6) return 'sabado';
-  if (dow === 0) return 'domingo';
-  return 'habil';
-}
+type TipoDia = 'habil' | 'sabado' | 'domingo' | 'feriado' | 'feriado_finde';
 
 export const colores = {
   habil: '',
@@ -33,7 +25,7 @@ export const DayHeader: React.FC<DayHeaderProps> = ({ day, month, year, isFeriad
   const { weekdayAbr, tipoDia } = useMemo(() => {
     const date = new Date(year, month - 1, day);
     const dayIndex = date.getDay();
-    const tipo = clasificarDia(day, year, month, isFeriado);
+    const tipo = clasificarDia(day, year, month, [isFeriado ? day : -1]) as TipoDia;
     return {
       weekdayAbr: DIAS_SEMANA_ABR[dayIndex],
       tipoDia: tipo
