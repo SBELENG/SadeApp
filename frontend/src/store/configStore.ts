@@ -49,13 +49,23 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
   nivel: 'segundo',
   year: 2026,
   month: 6, // Junio 2026
-  feriados: [20, 25], // Feriados nacionales por defecto en Junio
+  feriados: (() => {
+    try {
+      const parsed = JSON.parse(localStorage.getItem('sade_feriados') || '[]');
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  })(), // Feriados nacionales por defecto en Junio
   isCritical: false,
   ratio: '1:2',
   unidades: 1,
   ratioElegido: 'min',
   dotacion: null,
-  logoBase64: typeof window !== 'undefined' ? localStorage.getItem('sade_institucion_logo') : null,
+  logoBase64: typeof window !== 'undefined' ? (() => {
+    const cached = localStorage.getItem('sade_institucion_logo');
+    return (cached && cached !== 'null') ? cached : null;
+  })() : null,
   nombreInstitucion: typeof window !== 'undefined' ? (localStorage.getItem('sade_nombre_institucion') || 'HOSPITAL REGIONAL DE ALTA COMPLEJIDAD') : 'HOSPITAL REGIONAL DE ALTA COMPLEJIDAD',
   nombreDepartamento: typeof window !== 'undefined' ? (localStorage.getItem('sade_nombre_departamento') || 'MEDICINA INTERNA') : 'MEDICINA INTERNA',
   nombreSupervisor: typeof window !== 'undefined' ? (() => {

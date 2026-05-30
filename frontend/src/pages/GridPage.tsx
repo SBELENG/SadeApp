@@ -78,16 +78,46 @@ export const GridPage: React.FC = () => {
           <p style={{ color: 'var(--text2)', marginBottom: '28px', fontSize: '15px', lineHeight: '1.6' }}>
             Para que el motor de SADE pueda armar la planilla, necesitas tener exactamente a los enfermeros que calculaste.
             <br/><br/>
-            Actualmente tenés <strong style={{ color: '#f87171' }}>{personalCount}</strong> cargados en la lista, pero SADE determinó que necesitás <strong style={{ color: 'var(--accent3)' }}>{dotacion.Z_ceil}</strong>.
-            ¡Hacé click en "Ajustar Nómina" para agregar o quitar los que hagan falta!
+            Actualmente tenés <strong style={{ color: '#f87171' }}>{personalCount}</strong> cargados en la lista, pero SADE determinó que necesitás <strong style={{ color: 'var(--accent3)' }}>{dotacion.Z_ceil || Math.ceil(dotacion.Z)}</strong>.
           </p>
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
-            <button className="btn-premium" onClick={() => setShowRosterModal(true)}>
-              👥 Ajustar Nómina ({personalCount}/{dotacion.Z_ceil})
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+            <button 
+              className="btn-premium" 
+              style={{ background: 'var(--accent)', color: '#000', padding: '16px 24px', fontSize: '16px', animation: 'pulse 2s infinite' }}
+              onClick={() => {
+                const target = dotacion.Z_ceil || Math.ceil(dotacion.Z);
+                if (personalCount < target) {
+                  for (let i = personalCount; i < target; i++) {
+                    agregarEnfermero({
+                      id: `auto-${Date.now()}-${i}`,
+                      nombre: `Enfermero`,
+                      apellido: `${i + 1}`,
+                      dni: `11.111.${i}`,
+                      matricula: `AUTO-${i}`,
+                      nivel_formacion: 'ENFERMERO_PROFESIONAL',
+                      jornada_horas: 8,
+                      turno_fijo: null,
+                      antiguedad_anos: 1,
+                      compensatorio_pendiente: 0
+                    });
+                  }
+                } else if (personalCount > target) {
+                  for (let i = personalCount - 1; i >= target; i--) {
+                    eliminarEnfermero(personal[i].id);
+                  }
+                }
+              }}
+            >
+              ✨ Autocompletar Nómina y Ver Planilla ✨
             </button>
-            <button className="btn-secondary-tech" onClick={() => setCurrentPage('config')}>
-              ⚙️ Volver a Configuración
-            </button>
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <button className="btn-secondary-tech" onClick={() => setShowRosterModal(true)}>
+                ⚙️ Ajustar Manualmente ({personalCount}/{dotacion.Z_ceil || Math.ceil(dotacion.Z)})
+              </button>
+              <button className="btn-secondary-tech" onClick={() => setCurrentPage('config')}>
+                Volver a Configuración
+              </button>
+            </div>
           </div>
         </div>
 
