@@ -72,18 +72,21 @@ export const GridPage: React.FC = () => {
   if (personalCount !== dotacion.Z_ceil) {
     return (
       <div className="main-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', textAlign: 'center', maxWidth: '1280px', padding: '40px 24px' }}>
-        <div className="card-premium" style={{ maxWidth: '550px', width: '100%', padding: '40px', border: '1px solid rgba(239, 68, 68, 0.4)', background: 'var(--surface)' }}>
-          <span style={{ fontSize: '48px', marginBottom: '20px', display: 'block' }}>⚠️</span>
-          <h2 style={{ marginBottom: '16px', color: '#f87171', fontFamily: 'var(--display)' }}>Dotación Inconsistente</h2>
+        <div className="card-premium" style={{ maxWidth: '550px', width: '100%', padding: '40px', border: '1px solid rgba(56, 189, 248, 0.4)', background: 'var(--surface)' }}>
+          <span style={{ fontSize: '48px', marginBottom: '20px', display: 'block' }}>👥</span>
+          <h2 style={{ marginBottom: '16px', color: 'var(--accent)', fontFamily: 'var(--display)' }}>Paso final: Asignar al Personal</h2>
           <p style={{ color: 'var(--text2)', marginBottom: '28px', fontSize: '15px', lineHeight: '1.6' }}>
-            El personal activo es <strong style={{ color: 'var(--accent)' }}>{personalCount}</strong>, la dotación requerida es <strong style={{ color: 'var(--accent)' }}>{dotacion.Z_ceil}</strong>. Ajuste el personal antes de continuar.
+            Para que el motor de SADE pueda armar la planilla, necesitas tener exactamente a los enfermeros que calculaste.
+            <br/><br/>
+            Actualmente tenés <strong style={{ color: '#f87171' }}>{personalCount}</strong> cargados en la lista, pero SADE determinó que necesitás <strong style={{ color: 'var(--accent3)' }}>{dotacion.Z_ceil}</strong>.
+            ¡Hacé click en "Ajustar Nómina" para agregar o quitar los que hagan falta!
           </p>
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
             <button className="btn-premium" onClick={() => setShowRosterModal(true)}>
-              👥 Ajustar Nómina
+              👥 Ajustar Nómina ({personalCount}/{dotacion.Z_ceil})
             </button>
             <button className="btn-secondary-tech" onClick={() => setCurrentPage('config')}>
-              ⚙️ Configuración
+              ⚙️ Volver a Configuración
             </button>
           </div>
         </div>

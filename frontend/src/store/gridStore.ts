@@ -135,15 +135,19 @@ const MOCK_STAFF: PersonalMock[] = [
 ];
 
 function cargarPersonalDesdeStorage(): PersonalMock[] {
-  try {
-    if (typeof window !== 'undefined') {
-      const cached = localStorage.getItem('sade_personal');
-      if (cached) return JSON.parse(cached);
+  if (typeof window === 'undefined') return MOCK_STAFF;
+  const data = localStorage.getItem('sade_personal');
+  if (data) {
+    try {
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {
+      return MOCK_STAFF;
     }
-  } catch {
-    /* ignorar */
   }
-  return [...MOCK_STAFF];
+  return MOCK_STAFF;
 }
 
 // ─── STORE ────────────────────────────────────────────────────────────────────
