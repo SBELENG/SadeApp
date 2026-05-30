@@ -145,29 +145,23 @@ const App: React.FC = () => {
                       }}
                     />
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (window.confirm('¿Desea quitar el logo institucional?')) {
-                          setLogoBase64(null);
-                        }
-                      }}
+                      onClick={eliminarLogo}
                       style={{
                         position: 'absolute',
                         top: '-6px',
                         right: '-6px',
-                        background: 'var(--accent5)',
-                        color: '#fff',
+                        background: '#ef4444',
+                        color: 'white',
                         border: 'none',
                         borderRadius: '50%',
-                        width: '14px',
-                        height: '14px',
-                        fontSize: '9px',
+                        width: '16px',
+                        height: '16px',
+                        fontSize: '10px',
+                        cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        cursor: 'pointer',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                        lineHeight: '1'
+                        boxShadow: '0 0 0 2px var(--bg-color)'
                       }}
                       title="Eliminar logo"
                     >
@@ -179,17 +173,37 @@ const App: React.FC = () => {
                     width: '36px',
                     height: '36px',
                     borderRadius: '6px',
-                    background: 'rgba(56, 189, 248, 0.08)',
-                    border: '1.5px dashed var(--accent)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: 'var(--accent)',
-                    fontSize: '15px',
-                    fontWeight: 'bold',
-                    flexShrink: 0
+                    fontSize: '20px',
+                    flexShrink: 0,
+                    cursor: 'pointer',
+                    position: 'relative'
                   }}>
-                    🏥
+                    <img 
+                      src="/logo.svg" 
+                      alt="SADE Logo" 
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                    <div style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'rgba(0,0,0,0.5)',
+                      color: 'white',
+                      fontSize: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      opacity: 0,
+                      borderRadius: '6px',
+                      transition: 'opacity 0.2s',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}
+                    >
+                      Editar
+                    </div>
                   </div>
                 )}
               </div>
