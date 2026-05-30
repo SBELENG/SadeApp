@@ -3,7 +3,8 @@ import { useGridStore } from '../../store/gridStore';
 import type { TurnoTipo } from '../../store/gridStore';
 import { useConfigStore } from '../../store/configStore';
 import { useShiftValidation, validarTurnoCelda } from '../../hooks/useShiftValidation';
-import { clasificarDia, colores } from './DayHeader';
+import { colores } from './DayHeader';
+import { clasificarDia } from '../../utils/planilla.engine';
 
 interface ShiftCellProps {
   personalId: string;
