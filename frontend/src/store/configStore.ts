@@ -84,11 +84,6 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
       indexI = parseFloat(((spec.minI + spec.maxI) / 2).toFixed(1));
     }
 
-    const uppercaseSpecName = spec.especialidad.toUpperCase();
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('sade_nombre_departamento', uppercaseSpecName);
-    }
-
     set({ 
       serviceKey: key, 
       isCritical, 
@@ -96,8 +91,7 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
       nivel,
       unidades: 1,
       ratioElegido: 'min',
-      dotacion: null, // resetear cálculo al cambiar especialidad
-      nombreDepartamento: uppercaseSpecName
+      dotacion: null // resetear cálculo al cambiar especialidad
     });
   },
 

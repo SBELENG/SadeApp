@@ -287,7 +287,7 @@ export function generarPlanilla(input: PlanillaInput): any {
     };
   }
 
-  const offsets = calcularOffsetBase(Z);
+  const offsets = calcularOffsetBase(Z_ceil);
   
   const grupos = { mañana: [], tarde: [], noche: [] } as any;
   const celdas: any[] = [];

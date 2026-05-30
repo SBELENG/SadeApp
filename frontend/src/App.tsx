@@ -137,9 +137,11 @@ const App: React.FC = () => {
                       style={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover',
+                        objectFit: 'contain',
+                        background: 'rgba(255, 255, 255, 0.05)',
                         borderRadius: '6px',
-                        border: '1.5px solid var(--accent)'
+                        border: '1.5px solid var(--accent)',
+                        padding: '2px'
                       }}
                     />
                     <button
