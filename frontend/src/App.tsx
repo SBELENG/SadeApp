@@ -196,7 +196,7 @@ const App: React.FC = () => {
                 <input
                   type="text"
                   value={nombreInstitucion}
-                  onChange={(e) => setNombreInstitucion(e.target.value.toUpperCase())}
+                  onChange={(e) => setNombreInstitucion(e.target.value)}
                   style={{
                     background: 'transparent',
                     border: 'none',
@@ -223,7 +223,7 @@ const App: React.FC = () => {
                 <input
                   type="text"
                   value={nombreDepartamento}
-                  onChange={(e) => setNombreDepartamento(e.target.value.toUpperCase())}
+                  onChange={(e) => setNombreDepartamento(e.target.value)}
                   style={{
                     background: 'transparent',
                     border: 'none',
