@@ -1,0 +1,22 @@
+{
+  "name": "sade-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SADE — Sistema Automatizado de Dotación de Enfermería",
+  "scripts": {
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "build": "cd frontend && npm install && npm run build",
+    "prisma:generate": "npx prisma generate --schema=backend/prisma/schema.prisma",
+    "prisma:migrate": "npx prisma migrate deploy --schema=backend/prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.14.0",
+    "@vercel/node": "^4.0.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.14.0",
+    "typescript": "^5.4.5",
+    "@types/node": "^20.12.12"
+  }
+}
