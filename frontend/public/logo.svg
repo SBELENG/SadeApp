@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Fondo oscuro con bordes redondeados -->
+  <rect width="100" height="100" rx="20" fill="#050810" stroke="#38bdf8" stroke-width="2"/>
+  
+  <!-- Rombo central celeste / azul técnico -->
+  <polygon points="50,15 85,50 50,85 15,50" fill="none" stroke="#38bdf8" stroke-width="3" opacity="0.6"/>
+  
+  <!-- Cruz azul (cruz médica / hospital) -->
+  <path d="M40,25 h20 v15 h15 v20 h-15 v15 h-20 v-15 h-15 v-20 h15 z" fill="#0ea5e9"/>
+  
+  <!-- Círculo interior oscuro (el "hueco" en el medio de la cruz) -->
+  <circle cx="50" cy="50" r="8" fill="#050810" stroke="#e0f2fe" stroke-width="1.5"/>
+</svg>
