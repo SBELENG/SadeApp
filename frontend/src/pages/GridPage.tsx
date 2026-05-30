@@ -21,7 +21,8 @@ export const GridPage: React.FC = () => {
     personal,
     agregarEnfermero,
     eliminarEnfermero,
-    editarEnfermero
+    editarEnfermero,
+    errorGeneracion
   } = useGridStore();
 
   const { exportToPdf } = usePdf();
@@ -445,6 +446,12 @@ export const GridPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {errorGeneracion && (
+        <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', padding: '16px', borderRadius: '8px', color: '#f87171', marginBottom: '24px', fontFamily: 'var(--mono)', fontSize: '13px' }}>
+          <strong>Error de Generación:</strong> {errorGeneracion}
+        </div>
+      )}
 
       {/* Barra de Metadatos y Objetivos de Cobertura */}
       <div 
