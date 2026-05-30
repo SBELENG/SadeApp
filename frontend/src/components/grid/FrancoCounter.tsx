@@ -1,7 +1,16 @@
 import React, { useMemo } from 'react';
 import { useGridStore } from '../../store/gridStore';
 import { useConfigStore } from '../../store/configStore';
-import { calcFrancosBase, calcEstadoSemaforo } from '../../utils/planilla.engine';
+
+function calcFrancosBase(diasMes: number): number {
+  return diasMes >= 30 ? 9 : 8;
+}
+
+function calcEstadoSemaforo(asignados: number, disponibles: number): 'verde' | 'amarillo' | 'rojo' {
+  if (asignados === disponibles) return 'verde';
+  if (asignados < disponibles) return 'amarillo';
+  return 'rojo';
+}
 
 interface FrancoCounterProps {
   personalId: string;
