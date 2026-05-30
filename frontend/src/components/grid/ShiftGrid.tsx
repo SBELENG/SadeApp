@@ -240,6 +240,8 @@ export const ShiftGrid: React.FC = () => {
                 key={day}
                 personalId={enfermero.id}
                 dia={day}
+                mes={mes}
+                año={anio}
                 value={matches[day] || ''}
                 isWeekend={isWeekend}
                 isFeriado={feriados.includes(day)}

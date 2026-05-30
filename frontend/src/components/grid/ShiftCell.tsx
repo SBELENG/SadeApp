@@ -3,10 +3,13 @@ import { useGridStore } from '../../store/gridStore';
 import type { TurnoTipo } from '../../store/gridStore';
 import { useConfigStore } from '../../store/configStore';
 import { useShiftValidation, validarTurnoCelda } from '../../hooks/useShiftValidation';
+import { clasificarDia, colores } from './DayHeader';
 
 interface ShiftCellProps {
   personalId: string;
   dia: number;
+  mes: number;
+  año: number;
   value: TurnoTipo;
   isWeekend: boolean;
   isFeriado: boolean;
@@ -23,6 +26,8 @@ interface ShiftCellProps {
 export const ShiftCell: React.FC<ShiftCellProps> = ({
   personalId,
   dia,
+  mes,
+  año,
   value,
   isWeekend,
   isFeriado,
@@ -234,6 +239,7 @@ export const ShiftCell: React.FC<ShiftCellProps> = ({
 
   return (
     <td
+      className={colores[clasificarDia(dia, año, mes, isFeriado)]}
       style={{
         padding: '3px 0',
         textAlign: 'center',
@@ -244,11 +250,7 @@ export const ShiftCell: React.FC<ShiftCellProps> = ({
           ? 'rgba(251, 191, 36, 0.06)'
           : isSwapTarget
           ? 'rgba(251, 191, 36, 0.02)'
-          : isFeriado
-          ? 'rgba(251, 146, 60, 0.06)'
-          : isWeekend
-          ? 'rgba(255, 255, 255, 0.015)'
-          : 'transparent',
+          : undefined,
         transition: 'background 0.15s ease',
       }}
     >
