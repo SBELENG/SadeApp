@@ -240,7 +240,7 @@ export const ShiftCell: React.FC<ShiftCellProps> = ({
 
   return (
     <td
-      className={colores[clasificarDia(dia, año, mes, isFeriado)]}
+      className={colores[clasificarDia(dia, año, mes, isFeriado ? [dia] : [])]}
       style={{
         padding: '3px 0',
         textAlign: 'center',
