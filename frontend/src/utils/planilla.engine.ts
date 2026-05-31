@@ -263,12 +263,18 @@ export function clasificarDia(dia: number, año: number, mes: number, feriados: 
 }
 
 // Helper para convertir Secuencia -> Mapa (usado por el componente Grid)
-export function planillaToTurnosMapa(planilla: Planilla): Record<string, Record<number, TurnoTipo>> {
-  const mapa: Record<string, Record<number, TurnoTipo>> = {};
+export function planillaToTurnosMapa(planilla: any): Record<string, Record<number, any>> {
+  const mapa: Record<string, Record<number, any>> = {};
+  if (!planilla || !planilla.personal) return mapa;
+
   for (const p of planilla.personal) {
     mapa[p.id] = {};
-    p.secuencia.forEach((turno, i) => {
-      mapa[p.id][i + 1] = turno;
+    p.secuencia.forEach((turno: string, i: number) => {
+      mapa[p.id][i + 1] = {
+        tipo: turno,
+        isFeriado: planilla.feriados ? planilla.feriados.includes(i + 1) : false,
+        isCompensatorio: false
+      };
     });
   }
   return mapa;
