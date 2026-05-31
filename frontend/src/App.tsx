@@ -184,13 +184,11 @@ const App: React.FC = () => {
                     fontSize: '20px',
                     flexShrink: 0,
                     cursor: 'pointer',
-                    position: 'relative'
+                    position: 'relative',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1.5px dashed rgba(56, 189, 248, 0.5)'
                   }}>
-                    <img 
-                      src="/logo.svg" 
-                      alt="SADE Logo" 
-                      style={{ width: '100%', height: '100%' }}
-                    />
+                    🏥
                     <div style={{
                       position: 'absolute',
                       inset: 0,
@@ -207,7 +205,7 @@ const App: React.FC = () => {
                     onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                     onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}
                     >
-                      Editar
+                      Subir
                     </div>
                   </div>
                 )}
