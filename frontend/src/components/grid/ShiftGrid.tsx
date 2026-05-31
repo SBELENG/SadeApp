@@ -29,10 +29,10 @@ export const ShiftGrid: React.FC = () => {
 
   // Agrupar el personal por grupo si hay planilla activa
   const { grupoM, grupoT, grupoN } = useMemo(() => {
-    if (planillaActual) {
-      const grupoM = personal.filter((p) => planillaActual.grupos.mañana.includes(p.id));
-      const grupoT = personal.filter((p) => planillaActual.grupos.tarde.includes(p.id));
-      const grupoN = personal.filter((p) => planillaActual.grupos.noche.includes(p.id));
+    if (planillaActual && planillaActual.grupos) {
+      const grupoM = personal.filter((p) => Array.isArray(planillaActual.grupos.mañana) && planillaActual.grupos.mañana.includes(p.id));
+      const grupoT = personal.filter((p) => Array.isArray(planillaActual.grupos.tarde) && planillaActual.grupos.tarde.includes(p.id));
+      const grupoN = personal.filter((p) => Array.isArray(planillaActual.grupos.noche) && planillaActual.grupos.noche.includes(p.id));
       return { grupoM, grupoT, grupoN };
     }
     // Fallback: usar turno_fijo del personal
@@ -75,6 +75,20 @@ export const ShiftGrid: React.FC = () => {
     }
 
     setSwapSelected(null);
+  };
+
+  // Calcular la suma de profesionales en un día y turno específico
+  const calcTotalDia = (dia: number, turnoStr: string) => {
+    let count = 0;
+    personal.forEach((p) => {
+      const t = turnos[p.id]?.[dia];
+      if (t && typeof t.tipo === 'string' && t.tipo.includes(turnoStr)) {
+        count++;
+      } else if (typeof t === 'string' && t.includes(turnoStr)) {
+        count++; // Fallback por si t es string de código viejo
+      }
+    });
+    return count;
   };
 
   // Renderiza el encabezado de grupo (separador entre grupos)
@@ -230,7 +244,7 @@ export const ShiftGrid: React.FC = () => {
             // 2) si el turno asignado es laboral (M, T o N)
             // No depende solo de planillaActual.celdas para actualizarse ante cambios de feriados.
             const turnoDelDia = matches[day] || '';
-            const esDiaFeriado = feriados.includes(day);
+            const esDiaFeriado = Array.isArray(feriados) && feriados.includes(day);
             const esTurnoLaboral = turnoDelDia === 'M' || turnoDelDia === 'T' || turnoDelDia === 'N';
             const esCompensatorio = esDiaFeriado && esTurnoLaboral;
 
@@ -244,7 +258,7 @@ export const ShiftGrid: React.FC = () => {
                 año={anio}
                 value={matches[day] || ''}
                 isWeekend={isWeekend}
-                isFeriado={feriados.includes(day)}
+                isFeriado={Array.isArray(feriados) && feriados.indexOf(day) !== -1}
                 esCompensatorio={esCompensatorio}
                 isSwapSource={swapSelected?.personalId === enfermero.id && swapSelected?.dia === day}
                 isSwapTarget={isSwapTarget}
@@ -351,7 +365,7 @@ export const ShiftGrid: React.FC = () => {
                     day={day}
                     month={mes}
                     year={anio}
-                    isFeriado={feriados.includes(day)}
+                    isFeriado={Array.isArray(feriados) && feriados.includes(day)}
                   />
                 ))}
 
