@@ -243,7 +243,9 @@ export const ShiftGrid: React.FC = () => {
             // 1) si el día es feriado (fuente: configStore.feriados, reactivo)
             // 2) si el turno asignado es laboral (M, T o N)
             // No depende solo de planillaActual.celdas para actualizarse ante cambios de feriados.
-            const turnoDelDia = matches[day] || '';
+            // BUG-B FIX: Extraer el string de manera segura, ya sea de un objeto o un string legado
+            const turnoCelda = matches[day];
+            const turnoDelDia = turnoCelda ? (typeof turnoCelda === 'string' ? turnoCelda : turnoCelda.tipo) : '';
             const esDiaFeriado = Array.isArray(feriados) && feriados.includes(day);
             const esTurnoLaboral = turnoDelDia === 'M' || turnoDelDia === 'T' || turnoDelDia === 'N';
             const esCompensatorio = esDiaFeriado && esTurnoLaboral;
@@ -256,7 +258,7 @@ export const ShiftGrid: React.FC = () => {
                 dia={day}
                 mes={mes}
                 año={anio}
-                value={matches[day] || ''}
+                value={turnoDelDia}
                 isWeekend={isWeekend}
                 isFeriado={Array.isArray(feriados) && feriados.indexOf(day) !== -1}
                 esCompensatorio={esCompensatorio}
